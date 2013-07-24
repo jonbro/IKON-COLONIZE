@@ -5,11 +5,19 @@ using System.Collections.Generic;
 public class Unit {
 	public Vector2 position;
 	public float fullHealth = 100;
-	public float health = 100;
+	float _health = 100;
+	public float health {
+		get{
+			return _health;
+		}
+		set{
+			_health = (int)Mathf.Min(value, fullHealth);
+		}
+	}
 	public int owner;
 	public float displaySize;
 	public bool alive = true;
-
+	public int xpValue = 1;
 	float _attackPower = 20;
 	public float attackPower{
 		get{
@@ -33,8 +41,8 @@ public class Unit {
 			return new Vector3(position.x, position.y, 25);
 		}
 	}
-	public void SetHealth(float _health){
-		fullHealth = health = _health;
+	public void SetHealth(float thishealth){
+		fullHealth = _health = thishealth;
 	}
 
 }
@@ -44,11 +52,13 @@ public class UnitBase : MonoBehaviour {
 	public float attackRadius;
 	protected int pid;
 	protected Color ourColor;
-	protected LineRenderManager lines;
+	public LineRenderManager lines;
 	List<UnitBase> targets;
 	public bool attacking;
-	float attackCooldownCounter;
+	public float attackCooldownCounter;
 	float attackCoolRatio;
+	public PlayerManager player;
+	public float temporaryDistance;
 	void Awake(){
 		targets = new List<UnitBase>();
 	}
@@ -84,6 +94,17 @@ public class UnitBase : MonoBehaviour {
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize, ourColor, 10);		
 	}
 	public void CheckNeighbors(List<UnitBase> units){
+		if(attackCooldownCounter>0){
+			return;
+		}
+		if(GetComponent<PlayerManager>()){
+			GetComponent<PlayerManager>().CheckNeighbors(units);
+			return;
+		}
+		if(GetComponent<CoreC>()){
+			GetComponent<CoreC>().CheckNeighbors(units);
+			return;
+		}
 		targets.Clear();
 		foreach(UnitBase unit in units){
 			if(Vector2.Distance(unit.u.position, u.position) - unit.u.displaySize < attackRadius && unit.u.owner != u.owner){
@@ -93,18 +114,24 @@ public class UnitBase : MonoBehaviour {
 		}
 		attacking = true;
 		if(targets.Count > 0){
-			// draw a line to the unit we would be attacking
-			lines.AddLine(u.pos3.Variation(1), targets[0].u.pos3.Variation(1), ourColor);
-			if(attackCooldownCounter<=0){
-				// attack the first target, and reset attack cooldown
-				attackCooldownCounter = u.attackCooldown;
-				targets[0].u.health -= u.attackPower;
-				if(targets[0].u.health <= 0){
-					targets[0].u.alive = false;
-				}
-			}
+			AttackTarget(targets[0]);
 		}else{
 			attacking = false;
+		}
+	}
+	public void AttackTarget(UnitBase target){
+		// draw a line to the unit we would be attacking
+		lines.AddLine(u.pos3.Variation(1), target.u.pos3.Variation(1), ourColor);
+		attackCooldownCounter = u.attackCooldown;
+		// attack the first target, and reset attack cooldown
+		target.u.health -= u.attackPower;
+		if(target.u.health <= 0){
+			target.u.alive = false;
+			// if it isn't a creep on creep kill
+			if((!(GetComponent<Creep>() && target.GetComponent<Creep>())) && (!(GetComponent<Tower>() && target.GetComponent<Creep>()))){
+				// claim xp for the kill
+				player.xp += target.u.xpValue;					
+			}
 		}
 	}
 }

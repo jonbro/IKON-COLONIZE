@@ -14,6 +14,8 @@ public class HullBreachGameController : MonoBehaviour {
 	float creepSpawnRate = 15.0f;
 	float nextCreepWave;
 	bool setup;
+	bool gameOver;
+	int winner;
 	void Awake(){
 		
 	}
@@ -27,11 +29,17 @@ public class HullBreachGameController : MonoBehaviour {
 			// setup cores
 			cores[i] = ((GameObject)Instantiate(corePrefab, Vector3.zero, Quaternion.identity)).GetComponent<CoreC>();
 			cores[i].Setup(i, pColors[i]);
+			units.Add(cores[i].GetComponent<UnitBase>());
 
 			// setup players
 			players[i] = ((GameObject)Instantiate(Resources.Load("PlayerManager"), Vector3.zero, Quaternion.identity)).GetComponent<PlayerManager>();
 			players[i].Setup(i, pColors[i], cores[i].u);
+
+			players[i].GetComponent<UnitBase>().player = players[i];
+			cores[i].GetComponent<UnitBase>().player = players[i];
+			
 			units.Add(players[i].GetComponent<UnitBase>());
+
 		}
 		// go through and add turrets for each of the cores
 		for(int i=0;i<3;i++){
@@ -39,6 +47,7 @@ public class HullBreachGameController : MonoBehaviour {
 				Tower t = ((GameObject)Instantiate(Resources.Load("Tower"), Vector3.zero, Quaternion.identity)).GetComponent<Tower>();
 				t.Setup(i, pColors[i], players[i].core, players[(i+j+1)%3].core);				
 				towers[i] = t;
+				t.GetComponent<UnitBase>().player = players[i];
 				units.Add(t.GetComponent<UnitBase>());
 			}
 		}
@@ -50,9 +59,10 @@ public class HullBreachGameController : MonoBehaviour {
 		for(int i=0;i<3;i++){
 			for(int j=0;j<2;j++){
 				// Creep c = new Creep();
-				for(int k=0;k<2;k++){
+				for(int k=0;k<4;k++){
 					Creep c = ((GameObject)Instantiate(Resources.Load("Creep"), Vector3.zero, Quaternion.identity)).GetComponent<Creep>();
-					c.Setup(i, pColors[i], players[i].core, players[(i+j+1)%3].core);				
+					c.Setup(i, pColors[i], players[i].core, players[(i+j+1)%3].core);
+					c.GetComponent<UnitBase>().player = players[i];
 					creeps.Add(c);
 					units.Add(c.GetComponent<UnitBase>());
 				}
@@ -66,6 +76,12 @@ public class HullBreachGameController : MonoBehaviour {
 		if(nextCreepWave<=0) SpawnCreeps();
 		for(int i=0;i<units.Count;i++){
 			units[i].CheckNeighbors(units);
+		}
+		// game over
+		if(gameOver){
+			VectorGui.Label("GAME OVER.", 0.3f);
+			VectorGui.Label("WINNER:", 0.3f);
+			VectorGui.Label("Player "+winner, 0.3f, pColors[winner]);
 		}
 	}
 	void FixedUpdate(){
@@ -82,9 +98,18 @@ public class HullBreachGameController : MonoBehaviour {
 				}
 				units[i].Explode();
 				if(units[i].GetComponent<PlayerManager>()){
-					Debug.Log("Should be killing player");
 					// reset the player back to the base
 					units[i].GetComponent<PlayerManager>().ResetPosition();
+				}else if(units[i].GetComponent<CoreC>()){
+					// check to see which player has the highest health on their core
+					int winner = 0;
+					float topHealth = cores[0].u.health;
+					for(int w=0;w<3;w++){
+						if(topHealth<cores[w].u.health){
+							winner = w;
+						}
+					}
+					gameOver = true;
 				}else{
 					Destroy(units[i].gameObject);
 					units.Remove(units[i]);					

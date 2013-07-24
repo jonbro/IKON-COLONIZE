@@ -75,9 +75,6 @@ public class LFInput : MonoBehaviour{
 	public LFTouch[] GetTouches(){
 		return _tempTouch.ToArray();
 	}
-	public static bool GetButtonDown(string buttonName){
-		return LFInput.Instance._GetButtonDown(buttonName);
-	}
 	void OnGUI(){
 		#if UNITY_STANDALONE
 		// because we want to be able to capture and process arbitrary keyboard events
@@ -99,6 +96,9 @@ public class LFInput : MonoBehaviour{
 		}
 		#endif
 	}
+	public static bool GetButtonDown(string buttonName){
+		return LFInput.Instance._GetButtonDown(buttonName);
+	}
 	bool _GetButtonDown(string buttonName){
 		// look at the dictionary mapping, and check the correct button
 		bool rVal = false;
@@ -110,6 +110,26 @@ public class LFInput : MonoBehaviour{
 					rVal = rVal || inputMap.buttonMapping[i].down;
 				}else{
 					rVal = rVal || Input.GetKeyDown(inputMap.buttonMapping[i].key);
+				}
+			}
+
+		}
+		return rVal;
+	}
+	public static bool GetButton(string buttonName){
+		return LFInput.Instance._GetButton(buttonName);
+	}
+	bool _GetButton(string buttonName){
+		// look at the dictionary mapping, and check the correct button
+		bool rVal = false;
+		for(int i=0;i<inputMap.buttonMapping.Count;i++){
+			if(inputMap.buttonMapping[i].id == buttonName){
+				if(inputMap.buttonMapping[i].bType == LFButtonInputMap.buttonType.JOYSTICK){
+					rVal = rVal || Input.GetKey(inputMap.buttonMapping[i].joystickString);
+				}else if(inputMap.buttonMapping[i].bType == LFButtonInputMap.buttonType.JOYSTICK_AXIS){
+					rVal = rVal || inputMap.buttonMapping[i].down;
+				}else{
+					rVal = rVal || Input.GetKey(inputMap.buttonMapping[i].key);
 				}
 			}
 

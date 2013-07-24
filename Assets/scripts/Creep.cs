@@ -15,7 +15,6 @@ public class Creep : MonoBehaviour {
 	float maxForce = 2.5f;
 	Vector2 vel;
 	Vector2 acc;
-
 	void Start(){
 		// maxForce *= Time.fixedDeltaTime;
 		maxSpeed *= Time.fixedDeltaTime;
@@ -28,7 +27,7 @@ public class Creep : MonoBehaviour {
 		u.displaySize = 3;
 		u.SetHealth(50);
 		u.attackPower = 20;
-		u.attackCooldown = 1.0f;
+		u.attackCooldown = 1f;
 		GetComponent<UnitBase>().attackRadius = 6;
 	}
 	public void ApplySteering(List<UnitBase> units){
@@ -40,8 +39,8 @@ public class Creep : MonoBehaviour {
 		targetForce -= vel;
 		targetForce = Vector2.ClampMagnitude(targetForce, maxForce);
 		Vector2 sep = Sep(units);
-		targetForce *= 0.25f;
-		sep *= 0.75f;
+		targetForce *= 0.75f;
+		sep *= 0.25f;
 		acc += targetForce;
 		acc += sep;
 		vel += acc;
@@ -55,7 +54,7 @@ public class Creep : MonoBehaviour {
 		Vector2 steer = Vector2.zero;
 		int count = 0;
 		foreach(UnitBase c in units){
-			float targetSep = u.displaySize+c.u.displaySize;
+			float targetSep = (u.displaySize+c.u.displaySize)*2;
 
 			float d = Vector2.Distance(u.position, c.u.position);
 			// should account for the towers, possibly have different weighting for those...

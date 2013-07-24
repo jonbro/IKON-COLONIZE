@@ -15,9 +15,9 @@ public class Tower : MonoBehaviour {
 		Vector2 dir = targetCore.position-ourCore.position;
 		u.position = ourCore.position + dir.normalized * (dir.magnitude*(1/3.0f));
 		u.displaySize = 12;
-		GetComponent<UnitBase>().attackRadius = 28;
-		u.SetHealth(200);
-		u.attackPower = 40;
-		u.attackCooldown = 0.6f;
+		GetComponent<UnitBase>().attackRadius = 20;
+		u.SetHealth(150);
+		u.attackPower = 35;
+		u.attackCooldown = 2.0f;
 	}
 }

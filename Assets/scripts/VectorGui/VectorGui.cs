@@ -52,11 +52,18 @@ public class VectorGui : MonoBehaviour {
 		// draw the label
 		Label(LabelText, 0.1f);
 	}
+	public static void Label(string LabelText, float scale, Color color){
+		// draw the label
+		Instance._Label(LabelText, scale, color);
+	}
 	public static void Label(string LabelText, float scale){
 		Instance._Label(LabelText, scale);
 	}
 	public void _Label(string LabelText, float scale){
-		strings.Text(LabelText, Pen(), scale);
+		_Label(LabelText, scale, Color.white);
+	}
+	public void _Label(string LabelText, float scale, Color c){
+		strings.Text(LabelText, Pen(), scale, c);
 		// move the pen in world space to calculate the new screen space position
 		Vector3 wp = Pen().position;
 		// the text is 3 tall

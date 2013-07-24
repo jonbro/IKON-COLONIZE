@@ -12,8 +12,9 @@ http://moebio.com/research/typode/
 TODO:
 =====
 
-- game over screen
-- balance the towers to be beatable (should spend longer burning down the creeps, prioritize targets based on distance)
-- add abilities to the players
-- have an xp counter for the players
+x game over screen
+- recharge within your towers radius
+x balance the towers to be beatable (should spend longer burning down the creeps, prioritize targets based on distance)
+x add abilities to the players
+x have an xp counter for the players
 - make it so that you can't escape the lanes (put in walls)
