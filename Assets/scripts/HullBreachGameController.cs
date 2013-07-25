@@ -61,7 +61,7 @@ public class HullBreachGameController : MonoBehaviour {
 				// Creep c = new Creep();
 				int spawnCount = Random.Range(2, 5);
 				for(int k=0;k<spawnCount;k++){
-					// if(i==0){
+					// if(i==1){
 						Creep c = ((GameObject)Instantiate(Resources.Load("Creep"), Vector3.zero, Quaternion.identity)).GetComponent<Creep>();
 						c.Setup(i, pColors[i], players[i].core, players[(i+j+1)%3].core);
 						c.GetComponent<UnitBase>().player = players[i];
@@ -104,15 +104,17 @@ public class HullBreachGameController : MonoBehaviour {
 					// reset the player back to the base
 					units[i].GetComponent<PlayerManager>().Killed();
 
-				}else if(units[i].GetComponent<CoreC>()){
+				}else if(units[i].GetComponent<CoreC>() && !gameOver){
 					// check to see which player has the highest health on their core
-					int winner = 0;
-					float topHealth = cores[0].u.health;
+					float topHealth = 0;
 					for(int w=0;w<3;w++){
+						Debug.Log("TOP CORE: "+winner+" : health : "+cores[w].u.health);
 						if(topHealth<cores[w].u.health){
+							topHealth = cores[w].u.health;
 							winner = w;
 						}
 					}
+					Debug.Log("TOP CORE: "+winner+" : health : "+cores[winner].u.health);
 					gameOver = true;
 				}else{
 					Destroy(units[i].gameObject);
