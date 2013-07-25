@@ -25,6 +25,9 @@ public class PlayerManager : MonoBehaviour {
 	Modes currentMode;
 	List<UnitBase> targets;
 	bool selectingMode;
+	public bool respawning;
+	int killCount = 0;
+	float respawnRemain;
     void Start(){
         lines = GameObject.Find("LineRenderManager").GetComponent<LineRenderManager>();
 		strings = GetComponent<UnitBase>().lines.GetComponent<DrawString>();
@@ -43,6 +46,13 @@ public class PlayerManager : MonoBehaviour {
 		u.attackCooldown = 1f;
 		ourColor = _ourColor;
     }
+    public void Killed(){
+    	killCount++;
+    	respawning = true;
+    	respawnRemain = killCount*2;
+    	ResetPosition();
+    	GetComponent<UnitBase>().enabled = false;
+    }
 	public void ResetPosition(){
         u.position = (Vector2.one*83).Rotate((pid*(360/3.0f))*Mathf.Deg2Rad);		
         u.SetHealth(100);
@@ -52,6 +62,19 @@ public class PlayerManager : MonoBehaviour {
 	void Update () {
         if(!setup)
             return;
+        if(respawning){
+        	respawnRemain -= Time.deltaTime;
+
+			// draw all the various info on the screen
+			transform.position = core.pos3+Vector3.left*-30;
+			transform.localScale = new Vector3(10, 10, 10);
+			strings.Text("wait: "+respawnRemain+" / ", transform, 0.2f, ourColor);
+
+        	if(respawnRemain <= 0){
+        		respawning = false;
+	        	GetComponent<UnitBase>().enabled = true;
+        	}
+        }
 		if(LFInput.GetButtonDown("p"+(pid+1)+" flip")){
 			selectingMode = true;
 		}
@@ -71,7 +94,12 @@ public class PlayerManager : MonoBehaviour {
 				selectingMode = false;
 			}
 			DrawOptions();
-		}else{
+		}else if(currentMode == Modes.TURTLE){
+			if(GetComponent<UnitBase>().attackCooldownCounter <= 0){
+				u.health += 15;
+				GetComponent<UnitBase>().attackCooldownCounter = u.attackCooldown;
+			}
+		}else if(!respawning){
 			Vector2 input = new Vector2(LFInput.GetAxis("p"+(pid+1)+" horizontal"), -LFInput.GetAxis("p"+(pid+1)+" vertical"));
 			float speed = 40.0f;
 			if(currentMode == Modes.DASH){
@@ -82,10 +110,6 @@ public class PlayerManager : MonoBehaviour {
 			transform.localScale = new Vector3(10, 10, 10);
 			strings.Text(currentMode.ToString(), transform, 0.1f, ourColor);
 		}
-		// draw all the various info on the screen
-		transform.position = core.pos3+Vector3.left*-30;
-		transform.localScale = new Vector3(10, 10, 10);
-		strings.Text("xp: "+xp+" / ", transform, 0.2f, ourColor);
 	}
 	void DrawOptions(){
 		
@@ -109,7 +133,7 @@ public class PlayerManager : MonoBehaviour {
 	public void CheckNeighbors(List<UnitBase> units){
 		targets.Clear();
 		foreach(UnitBase unit in units){
-			if((currentMode == Modes.ATTACK && unit.u.owner != u.owner) || (currentMode == Modes.HEAL && unit.u != u)){
+			if((currentMode == Modes.ATTACK && unit.u.owner != u.owner) || (currentMode == Modes.HEAL && unit.u != u && unit.u.owner == u.owner && !unit.GetComponent<CoreC>())){
 				if(Vector2.Distance(unit.u.position, u.position) - unit.u.displaySize < GetComponent<UnitBase>().attackRadius){
 					// we are within the attack radius!
 					targets.Add(unit);

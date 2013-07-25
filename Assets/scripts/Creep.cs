@@ -11,7 +11,7 @@ public class Creep : MonoBehaviour {
 			return GetComponent<UnitBase>().u;
 		}
 	}
-	float maxSpeed = 10.0f;
+	float maxSpeed = 15.0f;
 	float maxForce = 2.5f;
 	Vector2 vel;
 	Vector2 acc;
@@ -67,18 +67,17 @@ public class Creep : MonoBehaviour {
 		acc = Vector2.zero;
 	}
 	void Update(){
-		if(targets[0] && targets[0].temporaryDistance < 70){
-			lines.AddLine(targets[0].u.position, u.position, Color.white);
-		}
 	}
 	Vector2 Attract(List<UnitBase> units){
 		// should just attract to the nearest one
 		targets.Clear();
 		foreach(UnitBase unit in units){
-			if(unit.u.owner != u.owner){
+			if(unit.u.owner != u.owner && (!unit.GetComponent<PlayerManager>() || !unit.GetComponent<PlayerManager>().respawning)){
 				float dist = Vector2.Distance(unit.u.position, u.position);
-				unit.temporaryDistance = dist;
-				targets.Add(unit);
+				if(dist < 40){
+					unit.temporaryDistance = dist;
+					targets.Add(unit);					
+				}
 			}
 		}
 		targets.Sort(delegate(UnitBase p1, UnitBase p2)
@@ -87,7 +86,7 @@ public class Creep : MonoBehaviour {
 		    }
 		);
 		// return an attraction force towards the nearest unit
-		if(targets[0] && targets[0].temporaryDistance < 70){
+		if(targets.Count > 0 && targets[0]){
 			return ((targets[0].u.position - u.position).normalized*maxSpeed);
 		}
 		return Vector2.zero;

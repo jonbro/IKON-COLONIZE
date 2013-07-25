@@ -107,11 +107,17 @@ public class UnitBase : MonoBehaviour {
 		}
 		targets.Clear();
 		foreach(UnitBase unit in units){
-			if(Vector2.Distance(unit.u.position, u.position) - unit.u.displaySize < attackRadius && unit.u.owner != u.owner){
-				// we are within the attack radius!
+			float dist = Vector2.Distance(unit.u.position, u.position);
+			if(dist < attackRadius && unit.u.owner != u.owner && unit.u.alive){
+				unit.temporaryDistance = dist;
 				targets.Add(unit);
 			}
 		}
+		targets.Sort(delegate(UnitBase p1, UnitBase p2)
+		    {
+		        return (p1.temporaryDistance < p2.temporaryDistance)?-1:1;
+		    }
+		);
 		attacking = true;
 		if(targets.Count > 0){
 			AttackTarget(targets[0]);
@@ -121,7 +127,10 @@ public class UnitBase : MonoBehaviour {
 	}
 	public void AttackTarget(UnitBase target){
 		// draw a line to the unit we would be attacking
-		lines.AddLine(u.pos3.Variation(1), target.u.pos3.Variation(1), ourColor);
+		if(target == null){
+			return;
+		}
+		lines.AddLine(u.pos3.Variation(2), target.u.pos3.Variation(2), ourColor);
 		attackCooldownCounter = u.attackCooldown;
 		// attack the first target, and reset attack cooldown
 		target.u.health -= u.attackPower;

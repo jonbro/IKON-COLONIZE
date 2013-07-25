@@ -30,11 +30,13 @@ public class CoreC : MonoBehaviour {
 		targets.Clear();
 
 		foreach(UnitBase unit in units){
-			float dist = Vector2.Distance(unit.u.position, u.position);
-			if(dist - unit.u.displaySize < GetComponent<UnitBase>().attackRadius){
-				// we are within the attack radius!
-				unit.temporaryDistance = dist;
-				targets.Add(unit);
+			if(unit.GetComponent<PlayerManager>()&&unit.u.owner == u.owner){
+				float dist = Vector2.Distance(unit.u.position, u.position);
+				if(dist - unit.u.displaySize < GetComponent<UnitBase>().attackRadius){
+					// we are within the attack radius!
+					unit.temporaryDistance = dist;
+					targets.Add(unit);
+				}				
 			}
 		}
 		targets.Sort(delegate(UnitBase p1, UnitBase p2)
