@@ -5,12 +5,13 @@ using System.Collections.Generic;
 public class HullBreachGameController : MonoBehaviour {
 	PlayerManager[] players;
 	Tower[] towers;
-	CoreC[] cores;
+	public CoreC[] cores;
 	List<Creep> creeps;
 	
 	List<UnitBase> units;
 	public GameObject corePrefab;
 	public Color[] pColors;
+	public static Color[] globalColors;
 	float creepSpawnRate = 18.0f;
 	float nextCreepWave;
 	bool setup;
@@ -20,6 +21,12 @@ public class HullBreachGameController : MonoBehaviour {
 		
 	}
 	void Start () {
+		// copy the colors over
+		globalColors = new Color[pColors.Length];
+		for(int i=0;i<pColors.Length;i++){
+			globalColors[i] = pColors[i];
+		}
+		gameObject.name = "HBGameController";
 		creeps = new List<Creep>();
 		units = new List<UnitBase>();
 		cores = new CoreC[3];
@@ -27,13 +34,15 @@ public class HullBreachGameController : MonoBehaviour {
 		towers = new Tower[3*2];
 		for(int i=0;i<3;i++){
 			// setup cores
-			cores[i] = ((GameObject)Instantiate(corePrefab, Vector3.zero, Quaternion.identity)).GetComponent<CoreC>();
+			cores[i] = ((GameObject)PhotonNetwork.Instantiate("CoreC", Vector3.zero, Quaternion.identity, 0)).GetComponent<CoreC>();
+			// cores[i].GetComponent<PhotonView>().RPC("Setup", PhotonTargets.AllBuffered, i, pColors[i], 0);
 			cores[i].Setup(i, pColors[i]);
 			units.Add(cores[i].GetComponent<UnitBase>());
 
 			// setup players
-			players[i] = ((GameObject)Instantiate(Resources.Load("PlayerManager"), Vector3.zero, Quaternion.identity)).GetComponent<PlayerManager>();
-			players[i].Setup(i, pColors[i], cores[i].u);
+			players[i] = ((GameObject)PhotonNetwork.Instantiate("PlayerManager", Vector3.zero, Quaternion.identity, 0)).GetComponent<PlayerManager>();
+			players[i].Setup(i, pColors[i]);
+			// players[i].GetComponent<PhotonView>().RPC("Setup", PhotonTargets.AllBuffered, i, pColors[i], 0);
 
 			players[i].GetComponent<UnitBase>().player = players[i];
 			cores[i].GetComponent<UnitBase>().player = players[i];
@@ -44,7 +53,7 @@ public class HullBreachGameController : MonoBehaviour {
 		// go through and add turrets for each of the cores
 		for(int i=0;i<3;i++){
 			for(int j=0;j<2;j++){
-				Tower t = ((GameObject)Instantiate(Resources.Load("Tower"), Vector3.zero, Quaternion.identity)).GetComponent<Tower>();
+				Tower t = ((GameObject)PhotonNetwork.Instantiate("Tower", Vector3.zero, Quaternion.identity, 0)).GetComponent<Tower>();
 				t.Setup(i, pColors[i], players[i].core, players[(i+j+1)%3].core);				
 				towers[i] = t;
 				t.GetComponent<UnitBase>().player = players[i];
@@ -61,13 +70,11 @@ public class HullBreachGameController : MonoBehaviour {
 				// Creep c = new Creep();
 				int spawnCount = Random.Range(2, 5);
 				for(int k=0;k<spawnCount;k++){
-					// if(i==1){
-						Creep c = ((GameObject)Instantiate(Resources.Load("Creep"), Vector3.zero, Quaternion.identity)).GetComponent<Creep>();
-						c.Setup(i, pColors[i], players[i].core, players[(i+j+1)%3].core);
-						c.GetComponent<UnitBase>().player = players[i];
-						creeps.Add(c);
-						units.Add(c.GetComponent<UnitBase>());						
-					// }
+					Creep c = ((GameObject)PhotonNetwork.InstantiateSceneObject("Creep", Vector3.zero, Quaternion.identity, 0, null)).GetComponent<Creep>();
+					c.GetComponent<PhotonView>().RPC("Setup", PhotonTargets.AllBuffered, i, i, (i+j+1)%3);
+					c.GetComponent<UnitBase>().player = players[i];
+					creeps.Add(c);
+					units.Add(c.GetComponent<UnitBase>());
 				}
 			}
 		}		
@@ -75,11 +82,14 @@ public class HullBreachGameController : MonoBehaviour {
 	}
 	void Update(){
 		if(!setup) return;
-		nextCreepWave -= Time.deltaTime;
-		if(nextCreepWave<=0) SpawnCreeps();
-		for(int i=0;i<units.Count;i++){
-			units[i].CheckNeighbors(units);
+		if(PhotonNetwork.isMasterClient){
+			nextCreepWave -= Time.deltaTime;
+			if(nextCreepWave<=0) SpawnCreeps();
+			for(int i=0;i<units.Count;i++){
+				units[i].CheckNeighbors(units);
+			}
 		}
+
 		// game over
 		if(gameOver){
 			VectorGui.Label("GAME OVER.", 0.3f);
@@ -92,6 +102,9 @@ public class HullBreachGameController : MonoBehaviour {
 		for(int i=0;i<creeps.Count;i++){
 			creeps[i].ApplySteering(units);
 		}
+		if(!PhotonNetwork.isMasterClient){
+			return;
+		}
 		// remove all of the dead creeps
 		for(int i=units.Count-1;i>=0;i--){
 			if(!units[i].u.alive){
@@ -99,7 +112,7 @@ public class HullBreachGameController : MonoBehaviour {
 				if(units[i].GetComponent<Creep>()){
 	 				creeps.Remove(units[i].GetComponent<Creep>());
 				}
-				units[i].Explode();
+				units[i].GetComponent<PhotonView>().RPC("Explode", PhotonTargets.All);
 				if(units[i].GetComponent<PlayerManager>()){
 					// reset the player back to the base
 					units[i].GetComponent<PlayerManager>().Killed();
@@ -117,7 +130,7 @@ public class HullBreachGameController : MonoBehaviour {
 					Debug.Log("TOP CORE: "+winner+" : health : "+cores[winner].u.health);
 					gameOver = true;
 				}else{
-					Destroy(units[i].gameObject);
+					PhotonNetwork.Destroy(units[i].gameObject);
 					units.Remove(units[i]);					
 				}
 			}

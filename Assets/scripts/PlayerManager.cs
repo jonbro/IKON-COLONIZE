@@ -34,14 +34,14 @@ public class PlayerManager : MonoBehaviour {
 		currentMode = Modes.ATTACK;
 		targets = new List<UnitBase>();
     }
-    public void Setup(int _pid, Color _ourColor, Unit ourCore){
+    public void Setup(int _pid, Color _ourColor){
         pid = _pid;
         GetComponent<UnitBase>().Setup(_pid, _ourColor);
         ResetPosition();
         u.displaySize = 6f;
         GetComponent<UnitBase>().attackRadius = 12;
         setup = true;
-        core = ourCore;
+        core = GameObject.Find("HBGameController").GetComponent<HullBreachGameController>().cores[pid].u;
 		u.attackPower = 20;
 		u.attackCooldown = 1f;
 		ourColor = _ourColor;

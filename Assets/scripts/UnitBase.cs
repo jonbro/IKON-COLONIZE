@@ -89,6 +89,7 @@ public class UnitBase : MonoBehaviour {
 			lines.AddLine(pa, pb, new Color(ourColor.r, ourColor.g, ourColor.b, 0.25f));
 		}
 	}
+	[RPC]
 	public void Explode(){
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize*attackCoolRatio, ourColor, Time.time * 20, 3);
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize, ourColor, 10);		
@@ -125,6 +126,27 @@ public class UnitBase : MonoBehaviour {
 			attacking = false;
 		}
 	}
+	void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+	    if (stream.isWriting)
+	    {
+	        // We own this player: send the others our data
+	        stream.SendNext(u.position);
+	        stream.SendNext(u.displaySize);
+	        stream.SendNext(attackRadius);
+	        stream.SendNext(u.health);
+	    }
+	    else
+	    {
+	        // Network player, receive data
+	        this.u.position = (Vector2)stream.ReceiveNext();
+	        // this should just be sent on setup
+	        this.u.displaySize = (float)stream.ReceiveNext();
+	        this.attackRadius = (float)stream.ReceiveNext();
+	        this.u.health = (float)stream.ReceiveNext();
+	    }
+	}
+
 	public void AttackTarget(UnitBase target){
 		// draw a line to the unit we would be attacking
 		if(target == null){

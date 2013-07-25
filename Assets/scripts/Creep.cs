@@ -24,8 +24,12 @@ public class Creep : MonoBehaviour {
 		maxSpeed *= Time.fixedDeltaTime;
         lines = GameObject.Find("LineRenderManager").GetComponent<LineRenderManager>();
 	}
-	new public void Setup(int _pid, Color _ourColor, Unit ourCore, Unit targetCore){
-		GetComponent<UnitBase>().Setup(_pid, _ourColor);
+	
+	[RPC]
+	public void Setup(int _pid, int _ourColor, int tCore){
+		GetComponent<UnitBase>().Setup(_pid, HullBreachGameController.globalColors[_ourColor]);
+		Unit targetCore = GameObject.Find("HBGameController").GetComponent<HullBreachGameController>().cores[tCore].GetComponent<UnitBase>().u;
+		Unit ourCore = GameObject.Find("HBGameController").GetComponent<HullBreachGameController>().cores[_pid].GetComponent<UnitBase>().u;
 		Vector2 dir = targetCore.position-ourCore.position;
 		target = targetCore.position;
 		u.position = ourCore.position + dir.normalized * (2.0f+Random.value*0.2f) ;
