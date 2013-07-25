@@ -15,9 +15,14 @@ public class Creep : MonoBehaviour {
 	float maxForce = 2.5f;
 	Vector2 vel;
 	Vector2 acc;
-	void Start(){
+	List<UnitBase> targets;
+	// Use this for initialization
+	LineRenderManager lines;
+	void Start () {
+		targets = new List<UnitBase>();
 		// maxForce *= Time.fixedDeltaTime;
 		maxSpeed *= Time.fixedDeltaTime;
+        lines = GameObject.Find("LineRenderManager").GetComponent<LineRenderManager>();
 	}
 	new public void Setup(int _pid, Color _ourColor, Unit ourCore, Unit targetCore){
 		GetComponent<UnitBase>().Setup(_pid, _ourColor);
@@ -35,14 +40,25 @@ public class Creep : MonoBehaviour {
 		if(GetComponent<UnitBase>().attacking)
 			return;
 		Vector2 targetForce = target-u.position;
+		
 		targetForce = targetForce.normalized * maxSpeed;
 		targetForce -= vel;
 		targetForce = Vector2.ClampMagnitude(targetForce, maxForce);
+		
+		Vector2 attract = Attract(units);
 		Vector2 sep = Sep(units);
-		targetForce *= 0.75f;
-		sep *= 0.25f;
-		acc += targetForce;
-		acc += sep;
+		if(attract != Vector2.zero){
+			targetForce *= 0.7f;
+			sep *= 0.2f;
+			acc += sep;
+			acc += attract;
+
+		}else{
+			targetForce *= 0.5f;
+			sep *= 0.5f;
+			acc += targetForce;
+			acc += sep;
+		}
 		vel += acc;
 
 		vel = Vector2.ClampMagnitude(vel, maxSpeed);		
@@ -50,18 +66,46 @@ public class Creep : MonoBehaviour {
 
 		acc = Vector2.zero;
 	}
+	void Update(){
+		if(targets[0] && targets[0].temporaryDistance < 70){
+			lines.AddLine(targets[0].u.position, u.position, Color.white);
+		}
+	}
+	Vector2 Attract(List<UnitBase> units){
+		// should just attract to the nearest one
+		targets.Clear();
+		foreach(UnitBase unit in units){
+			if(unit.u.owner != u.owner){
+				float dist = Vector2.Distance(unit.u.position, u.position);
+				unit.temporaryDistance = dist;
+				targets.Add(unit);
+			}
+		}
+		targets.Sort(delegate(UnitBase p1, UnitBase p2)
+		    {
+		        return (p1.temporaryDistance < p2.temporaryDistance)?-1:1;
+		    }
+		);
+		// return an attraction force towards the nearest unit
+		if(targets[0] && targets[0].temporaryDistance < 70){
+			return ((targets[0].u.position - u.position).normalized*maxSpeed);
+		}
+		return Vector2.zero;
+	}
 	Vector2 Sep(List<UnitBase> units){
+		// should steer away from units that are on the same team
 		Vector2 steer = Vector2.zero;
 		int count = 0;
 		foreach(UnitBase c in units){
-			float targetSep = (u.displaySize+c.u.displaySize)*2;
-
-			float d = Vector2.Distance(u.position, c.u.position);
-			// should account for the towers, possibly have different weighting for those...
-			if(d>0 && d<targetSep){
-				Vector2 dir = u.position - c.u.position;
-				steer += dir.normalized/d;
-				count++;
+			if(c.u.owner == u.owner){
+				float targetSep = (u.displaySize+c.u.displaySize)*2;
+				float d = Vector2.Distance(u.position, c.u.position);
+				// should account for the towers, possibly have different weighting for those...
+				if(d>0 && d<targetSep){
+					Vector2 dir = u.position - c.u.position;
+					steer += dir.normalized/d;
+					count++;
+				}				
 			}
 		}
 		if(count > 0){
