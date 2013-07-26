@@ -51,7 +51,7 @@ public class UnitBase : MonoBehaviour {
 	public Unit u = new Unit();
 	public float attackRadius;
 	protected int pid;
-	protected Color ourColor;
+	public Color ourColor;
 	public LineRenderManager lines;
 	List<UnitBase> targets;
 	public bool attacking;
@@ -61,6 +61,7 @@ public class UnitBase : MonoBehaviour {
 	public float temporaryDistance;
 	void Awake(){
 		targets = new List<UnitBase>();
+		transform.parent = GameObject.Find("HBGameController").transform;
 	}
 	void Start(){
 		attackCooldownCounter =  u.attackCooldown;
@@ -89,12 +90,23 @@ public class UnitBase : MonoBehaviour {
 			lines.AddLine(pa, pb, new Color(ourColor.r, ourColor.g, ourColor.b, 0.25f));
 		}
 	}
+
+	[RPC]
+	public void SetHealth(float newHealth){
+		u.health = newHealth;
+	}
+
+	[RPC]
+	public void SetCooldown(float newCooldown){
+		attackCooldownCounter = newCooldown;
+	}
+
 	[RPC]
 	public void Explode(){
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize*attackCoolRatio, ourColor, Time.time * 20, 3);
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize, ourColor, 10);		
 	}
-	public void CheckNeighbors(List<UnitBase> units){
+	public void CheckNeighbors(UnitBase[] units){
 		if(attackCooldownCounter>0){
 			return;
 		}
@@ -132,37 +144,27 @@ public class UnitBase : MonoBehaviour {
 	    {
 	        // We own this player: send the others our data
 	        stream.SendNext(u.position);
-	        stream.SendNext(u.displaySize);
-	        stream.SendNext(attackRadius);
-	        stream.SendNext(u.health);
+	        stream.SendNext(attacking);
 	    }
 	    else
 	    {
 	        // Network player, receive data
 	        this.u.position = (Vector2)stream.ReceiveNext();
-	        // this should just be sent on setup
-	        this.u.displaySize = (float)stream.ReceiveNext();
-	        this.attackRadius = (float)stream.ReceiveNext();
-	        this.u.health = (float)stream.ReceiveNext();
+	        this.attacking = (bool)stream.ReceiveNext();
 	    }
 	}
 
 	public void AttackTarget(UnitBase target){
 		// draw a line to the unit we would be attacking
-		if(target == null){
+		if(target == null || (target.GetComponent<PlayerManager>() && target.GetComponent<PlayerManager>().respawning)){
 			return;
 		}
 		lines.AddLine(u.pos3.Variation(2), target.u.pos3.Variation(2), ourColor);
 		attackCooldownCounter = u.attackCooldown;
-		// attack the first target, and reset attack cooldown
-		target.u.health -= u.attackPower;
+		GetComponent<PhotonView>().RPC("SetCooldown", PhotonTargets.AllBuffered, u.attackCooldown);
+		target.GetComponent<PhotonView>().RPC("SetHealth", PhotonTargets.AllBuffered, target.u.health - u.attackPower);
 		if(target.u.health <= 0){
 			target.u.alive = false;
-			// if it isn't a creep on creep kill
-			if((!(GetComponent<Creep>() && target.GetComponent<Creep>())) && (!(GetComponent<Tower>() && target.GetComponent<Creep>()))){
-				// claim xp for the kill
-				player.xp += target.u.xpValue;					
-			}
 		}
 	}
 }

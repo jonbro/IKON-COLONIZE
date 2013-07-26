@@ -12,21 +12,43 @@ public class CoreC : MonoBehaviour {
 	void Start () {
 		targets = new List<UnitBase>();
 	}
-	public void Setup(int _pid, Color _ourColor){
+	void OnPhotonInstantiate(PhotonMessageInfo info){
+		Setup((int)GetComponent<PhotonView>().instantiationData[0], (int)GetComponent<PhotonView>().instantiationData[1]);
+	}
+	public void Setup(int _pid, int _ourColor){
 		int pid = _pid;
-        GetComponent<UnitBase>().Setup(_pid, _ourColor);
+		GetComponent<UnitBase>().Setup(_pid, HullBreachGameController.globalColors[_ourColor]);
 		u.position = (Vector2.one*130).Rotate((pid*(360/3.0f))*Mathf.Deg2Rad);
 		u.displaySize = 25;
 		GetComponent<UnitBase>().attackRadius = 27;
 		u.attackPower = 100;
 		u.attackCooldown = 10f;
 		u.SetHealth(400);
-	}	
+	}
+	void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+	    if (stream.isWriting)
+	    {
+	        // We own this player: send the others our data
+	        stream.SendNext(u.position);
+	        stream.SendNext(u.health);
+	        stream.SendNext(GetComponent<UnitBase>().attacking);
+	        stream.SendNext(GetComponent<UnitBase>().attackCooldownCounter);
+	    }
+	    else
+	    {
+	        // Network player, receive data
+	        this.u.position = (Vector2)stream.ReceiveNext();
+	        this.u.health = (float)stream.ReceiveNext();
+	        this.GetComponent<UnitBase>().attacking = (bool)stream.ReceiveNext();
+	        this.GetComponent<UnitBase>().attackCooldownCounter = (float)stream.ReceiveNext();
+	    }
+	}
 	// Update is called once per frame
 	void Update () {
 		// display current xp
 	}
-	public void CheckNeighbors(List<UnitBase> units){
+	public void CheckNeighbors(UnitBase[] units){
 		targets.Clear();
 
 		foreach(UnitBase unit in units){

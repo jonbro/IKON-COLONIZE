@@ -50,18 +50,10 @@ public class InputMap{
  	public void SetDefaults(){
  		buttonMapping.Clear();
  		axisMapping.Clear();
-		buttonMapping.Add(new LFButtonInputMap("p1 flip", LFButtonInputMap.buttonType.KEYBOARD, KeyCode.C, 0, 0));
-		buttonMapping.Add(new LFButtonInputMap("p1 fire", LFButtonInputMap.buttonType.KEYBOARD, KeyCode.V, 0, 0));
-
-
-		buttonMapping.Add(new LFButtonInputMap("p2 flip", LFButtonInputMap.buttonType.KEYBOARD, KeyCode.Comma, 0, 0));
-		buttonMapping.Add(new LFButtonInputMap("p2 fire", LFButtonInputMap.buttonType.KEYBOARD, KeyCode.Period, 0, 0));
-
-		buttonMapping.Add(new LFButtonInputMap("p1 weapon switch", LFButtonInputMap.buttonType.KEYBOARD, KeyCode.Space, 0, 0));
-
-		axisMapping.Add(new LFAxisInputMap("p1 horizontal", LFAxisInputMap.axisType.KEYBOARD, KeyCode.A, KeyCode.S, 0,0));
-		axisMapping.Add(new LFAxisInputMap("p2 vertical", LFAxisInputMap.axisType.KEYBOARD, KeyCode.UpArrow, KeyCode.DownArrow, 0,0));
-		axisMapping.Add(new LFAxisInputMap("p2 horizontal", LFAxisInputMap.axisType.KEYBOARD, KeyCode.LeftArrow, KeyCode.RightArrow, 0,0));
+		buttonMapping.Add(new LFButtonInputMap("p1 flip", LFButtonInputMap.buttonType.KEYBOARD, KeyCode.Z, 0, 0));
+		buttonMapping.Add(new LFButtonInputMap("p1 fire", LFButtonInputMap.buttonType.KEYBOARD, KeyCode.X, 0, 0));
+		axisMapping.Add(new LFAxisInputMap("p1 vertical", LFAxisInputMap.axisType.KEYBOARD, KeyCode.UpArrow, KeyCode.DownArrow, 0,0));
+		axisMapping.Add(new LFAxisInputMap("p1 horizontal", LFAxisInputMap.axisType.KEYBOARD, KeyCode.LeftArrow, KeyCode.RightArrow, 0,0));
 
 		LFButtonInputMap cax;
 

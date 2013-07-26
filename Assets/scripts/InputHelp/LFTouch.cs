@@ -38,14 +38,18 @@ public class LFInput : MonoBehaviour{
 		buttonsDown = new bool[3];
 		touchBuffer = new LFTouch[20];
 		// set up the default controller configs
-		configPath = Application.persistentDataPath + "/InputConfig.xml";
-		if(File.Exists(configPath)){
-			inputMap = InputMap.Load(configPath);
-		}else{
+		#if !UNITY_WEBPLAYER
+			configPath = Application.persistentDataPath + "/InputConfig.xml";
+			if(File.Exists(configPath)){
+				inputMap = InputMap.Load(configPath);
+			}else{
+		#endif
 			inputMap = new InputMap();
 			inputMap.SetDefaults();
+		#if !UNITY_WEBPLAYER
 			inputMap.Save(configPath);
 		}
+		#endif
 	}
 	void Start(){
 	}

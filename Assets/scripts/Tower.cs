@@ -8,16 +8,35 @@ public class Tower : MonoBehaviour {
 			return GetComponent<UnitBase>().u;
 		}
 	}
+	void OnPhotonInstantiate(PhotonMessageInfo info){
+		Setup((int)GetComponent<PhotonView>().instantiationData[0], (int)GetComponent<PhotonView>().instantiationData[1], (Vector2)GetComponent<PhotonView>().instantiationData[2]);
+	}
 
-	public void Setup(int _pid, Color _ourColor, Unit ourCore, Unit targetCore){
-		GetComponent<UnitBase>().Setup(_pid, _ourColor);
+	[RPC]
+	public void Setup(int _pid, int _ourColor, Vector2 position){
+		int pid = _pid;
+		GetComponent<UnitBase>().Setup(_pid, HullBreachGameController.globalColors[_ourColor]);
 		// position the turret unit a 1/3 of the way to the target core
-		Vector2 dir = targetCore.position-ourCore.position;
-		u.position = ourCore.position + dir.normalized * (dir.magnitude*(1/3.0f));
+		u.position = position;
 		u.displaySize = 12;
 		GetComponent<UnitBase>().attackRadius = 20;
 		u.SetHealth(150);
 		u.attackPower = 35;
 		u.attackCooldown = 2.0f;
+	}
+	void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+	    if (stream.isWriting)
+	    {
+	        // We own this player: send the others our data
+	        stream.SendNext(u.position);
+	        stream.SendNext(GetComponent<UnitBase>().attacking);
+	    }
+	    else
+	    {
+	        // Network player, receive data
+	        this.u.position = (Vector2)stream.ReceiveNext();
+	        this.GetComponent<UnitBase>().attacking = (bool)stream.ReceiveNext();
+	    }
 	}
 }

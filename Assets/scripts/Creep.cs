@@ -18,18 +18,31 @@ public class Creep : MonoBehaviour {
 	List<UnitBase> targets;
 	// Use this for initialization
 	LineRenderManager lines;
+	Unit targetCore;
+	Unit ourCore;
 	void Start () {
 		targets = new List<UnitBase>();
 		// maxForce *= Time.fixedDeltaTime;
 		maxSpeed *= Time.fixedDeltaTime;
         lines = GameObject.Find("LineRenderManager").GetComponent<LineRenderManager>();
 	}
-	
+	void OnPhotonInstantiate(PhotonMessageInfo info){
+		Setup((int)GetComponent<PhotonView>().instantiationData[0], (int)GetComponent<PhotonView>().instantiationData[1], (int)GetComponent<PhotonView>().instantiationData[2]);
+	}
+
 	[RPC]
 	public void Setup(int _pid, int _ourColor, int tCore){
 		GetComponent<UnitBase>().Setup(_pid, HullBreachGameController.globalColors[_ourColor]);
-		Unit targetCore = GameObject.Find("HBGameController").GetComponent<HullBreachGameController>().cores[tCore].GetComponent<UnitBase>().u;
-		Unit ourCore = GameObject.Find("HBGameController").GetComponent<HullBreachGameController>().cores[_pid].GetComponent<UnitBase>().u;
+		int i = 0;
+	    foreach(CoreC c in GameObject.Find("HBGameController").GetComponentsInChildren<CoreC>()){
+	    	i++;
+			if(c.u.owner == _pid){
+		        ourCore = c.u;
+			}
+			if(c.u.owner == tCore){
+				targetCore = c.u;
+			}
+        }
 		Vector2 dir = targetCore.position-ourCore.position;
 		target = targetCore.position;
 		u.position = ourCore.position + dir.normalized * (2.0f+Random.value*0.2f) ;
@@ -39,7 +52,22 @@ public class Creep : MonoBehaviour {
 		u.attackCooldown = 1f;
 		GetComponent<UnitBase>().attackRadius = 6;
 	}
-	public void ApplySteering(List<UnitBase> units){
+	void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+	    if (stream.isWriting)
+	    {
+	        // We own this player: send the others our data
+	        stream.SendNext(u.position);
+	        stream.SendNext(GetComponent<UnitBase>().attacking);
+	    }
+	    else
+	    {
+	        // Network player, receive data
+	        this.u.position = (Vector2)stream.ReceiveNext();
+	        this.GetComponent<UnitBase>().attacking = (bool)stream.ReceiveNext();
+	    }
+	}
+	public void ApplySteering(UnitBase[] units){
 		// accumulate forces and apply to the creep
 		if(GetComponent<UnitBase>().attacking)
 			return;
@@ -72,7 +100,7 @@ public class Creep : MonoBehaviour {
 	}
 	void Update(){
 	}
-	Vector2 Attract(List<UnitBase> units){
+	Vector2 Attract(UnitBase[] units){
 		// should just attract to the nearest one
 		targets.Clear();
 		foreach(UnitBase unit in units){
@@ -95,7 +123,7 @@ public class Creep : MonoBehaviour {
 		}
 		return Vector2.zero;
 	}
-	Vector2 Sep(List<UnitBase> units){
+	Vector2 Sep(UnitBase[] units){
 		// should steer away from units that are on the same team
 		Vector2 steer = Vector2.zero;
 		int count = 0;
