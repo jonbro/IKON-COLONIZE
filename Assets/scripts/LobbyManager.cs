@@ -9,6 +9,14 @@ public class LobbyManager : MonoBehaviour {
     public TextAsset naval;
     bool chooseRegion;
 	void Start () {
+        if (!PhotonNetwork.connected)
+        {
+            // PhotonNetwork.ConnectUsingSettings("1.0");
+            ServerSettings ss = new ServerSettings();
+            ss.UseCloud("c2bd3559-19e2-4734-88c9-fdd1d789be53", (int)CloudServerRegion.US);
+            PhotonNetwork.Connect(ss.ServerAddress, ss.ServerPort, ss.AppID, "1.0");
+            chooseRegion = true;
+	    }
 	    // generate a name for this player, if none is assigned yet
         if (string.IsNullOrEmpty(PhotonNetwork.playerName))
         {
