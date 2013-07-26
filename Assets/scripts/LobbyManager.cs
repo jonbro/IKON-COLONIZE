@@ -7,6 +7,7 @@ public class LobbyManager : MonoBehaviour {
     private Vector2 scrollPos = Vector2.zero;
     private bool connectFailed = false;
     public TextAsset naval;
+    bool chooseRegion;
 	void Start () {
         if (!PhotonNetwork.connected)
         {
@@ -19,9 +20,24 @@ public class LobbyManager : MonoBehaviour {
         }
 
 	}
-	
+	void Update(){
+        if(chooseRegion){
+            ConnectionUpdate();
+        }else{
+            VectorGui.Label("Select Region:");
+            foreach(CloudServerRegion region in CloudServerRegion.GetValues(typeof(CloudServerRegion))){
+                if (VectorGui.Button(region.ToString()))
+                {
+                    ServerSettings ss = new ServerSettings();
+                    ss.UseCloud("c2bd3559-19e2-4734-88c9-fdd1d789be53", (int)region);
+                    PhotonNetwork.Connect(ss.ServerAddress, ss.ServerPort, ss.AppID, "1.0");
+                    chooseRegion = true;
+                }
+            }
+        }
+    }
 	// Update is called once per frame
-	void Update () {
+	void ConnectionUpdate () {
 		VectorGui.Label("HULL BREACH: LOBBY", 0.3f);		
         if (!PhotonNetwork.connected)
         {
