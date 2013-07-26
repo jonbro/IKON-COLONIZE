@@ -35,7 +35,7 @@ public class LobbyManager : MonoBehaviour {
             }
             if (this.connectFailed)
             {
-            	VectorGui.Label("Connection failed. Check setup and use Setup Wizard to fix configuration.");
+            	VectorGui.Label("Connection failed. Connect to lobby server failed.");
             }
             return;
         }
