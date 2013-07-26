@@ -71,8 +71,8 @@ public class CoreC : MonoBehaviour {
 			// if the nearest target is our player, then heal to the maximum
 			if(targets[0].GetComponent<PlayerManager>() && targets[0].u.owner == u.owner){
 				// heal!
-				targets[0].u.health = targets[0].u.fullHealth;
-				GetComponent<UnitBase>().attackCooldownCounter = u.attackCooldown;
+				GetComponent<PhotonView>().RPC("SetCooldown", PhotonTargets.AllBuffered, u.attackCooldown);
+				targets[0].GetComponent<PhotonView>().RPC("SetHealth", PhotonTargets.AllBuffered, targets[0].u.fullHealth);
 			}else if(targets[0].u.owner != u.owner){
 				GetComponent<UnitBase>().attacking = true;
 				GetComponent<UnitBase>().AttackTarget(targets[0]);
