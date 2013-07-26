@@ -110,6 +110,11 @@ public class PlayerManager : MonoBehaviour {
 		respawning = false;
     	GetComponent<UnitBase>().enabled = true;
 	}
+
+	[RPC]
+	void SetMode(int newMode){
+		currentMode = (Modes)newMode;
+	}
 	// Update is called once per frame
 	void Update () {
         if(!setup){
@@ -127,6 +132,12 @@ public class PlayerManager : MonoBehaviour {
 		        	GetComponent<PhotonView>().RPC("Respawn", PhotonTargets.AllBuffered);
 		        }
         	}
+        }else{
+        	if(!GetComponent<PhotonView>().isMine || !selectingMode){    		
+				transform.position = u.pos3+Vector3.left*-10;
+				transform.localScale = new Vector3(10, 10, 10);
+				strings.Text(currentMode.ToString(), transform, 0.1f, ourColor);
+        	}
         }
         if(GetComponent<PhotonView>().isMine){
 			if(GetComponent<PhotonView>().isMine && LFInput.GetButtonDown("p1 flip")){
@@ -135,16 +146,16 @@ public class PlayerManager : MonoBehaviour {
 			if(selectingMode){
 				// check to see what mode we should switch into
 				if(LFInput.GetAxis("p1 vertical") > 0){
-					currentMode = Modes.ATTACK;
+					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.ATTACK);
 					selectingMode = false;
 				}else if(LFInput.GetAxis("p1 vertical") < 0){
-					currentMode = Modes.HEAL;
+					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.HEAL);
 					selectingMode = false;
 				}else if(LFInput.GetAxis("p1 horizontal") < 0){
-					currentMode = Modes.DASH;
+					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.DASH);
 					selectingMode = false;
 				}else if(LFInput.GetAxis("p1 horizontal") > 0){
-					currentMode = Modes.TURTLE;
+					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.TURTLE);
 					selectingMode = false;
 				}
 				DrawOptions();
@@ -160,9 +171,6 @@ public class PlayerManager : MonoBehaviour {
 					speed += speed*0.5f;
 				}
 				u.position += input*(Time.deltaTime*speed);
-				transform.position = u.pos3+Vector3.left*-10;
-				transform.localScale = new Vector3(10, 10, 10);
-				strings.Text(currentMode.ToString(), transform, 0.1f, ourColor);
 			}        	
         }
 	}
@@ -198,7 +206,6 @@ public class PlayerManager : MonoBehaviour {
 		GetComponent<UnitBase>().attacking = false;
 		if(targets.Count > 0){
 			if(currentMode == Modes.HEAL && GetComponent<UnitBase>().attackCooldownCounter <= 0){
-
 				GetComponent<UnitBase>().attackCooldownCounter = u.attackCooldown;
 				GetComponent<PhotonView>().RPC("SetCooldown", PhotonTargets.AllBuffered, u.attackCooldown);
 				targets[0].GetComponent<PhotonView>().RPC("SetHealth", PhotonTargets.AllBuffered, targets[0].u.health + 20);
