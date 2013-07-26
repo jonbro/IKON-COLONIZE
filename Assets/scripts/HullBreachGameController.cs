@@ -35,7 +35,6 @@ public class HullBreachGameController : MonoBehaviour {
 		towers = new Tower[3*2];
 
 		if(PhotonNetwork.isMasterClient){
-			Debug.Log("STARTUP!!");
 			for(int i=0;i<3;i++){
 				cores[i] = ((GameObject)PhotonNetwork.InstantiateSceneObject("CoreC", Vector3.zero, Quaternion.identity, 0, new object[] { i, i })).GetComponent<CoreC>();
 			}
@@ -49,13 +48,18 @@ public class HullBreachGameController : MonoBehaviour {
 				}
 			}
 		}
-
-		PlayerManager p = ((GameObject)PhotonNetwork.Instantiate("PlayerManager", Vector3.zero, Quaternion.identity, 0)).GetComponent<PlayerManager>();
-		p.GetComponent<PhotonView>().RPC("Setup", PhotonTargets.AllBuffered);
-		p.GetComponent<UnitBase>().player = p;
-
+		// find my player in the list
+		for(int i=0;i<3;i++){
+			if(InitGame.playerMapper[i] == PhotonNetwork.player.ID){
+				PlayerManager p = ((GameObject)PhotonNetwork.Instantiate("PlayerManager", Vector3.zero, Quaternion.identity, 0)).GetComponent<PlayerManager>();
+				p.GetComponent<PhotonView>().RPC("Setup", PhotonTargets.AllBuffered, i);
+				p.GetComponent<UnitBase>().player = p;
+				break;				
+			}
+		}
 		setup = true;		
 	}
+
 	void SpawnCreeps(){
 		nextCreepWave = creepSpawnRate;
 		// boost out some creeps from each players core, set their targets towards the other players cores

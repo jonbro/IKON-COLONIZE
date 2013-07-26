@@ -12,7 +12,7 @@ public class PlayerManager : MonoBehaviour {
 	Unit[] creeps;
 	LineRenderManager lines;
 	Color ourColor;
-	int pid = -1;
+	public int pid = -1;
     bool setup;
 	public int xp = 0;
 	DrawString strings;
@@ -24,7 +24,7 @@ public class PlayerManager : MonoBehaviour {
 	};
 	Modes currentMode;
 	List<UnitBase> targets;
-	bool selectingMode;
+	bool selectingMode, ready;
 	public bool respawning;
 	int killCount = 0;
 	float respawnRemain;
@@ -37,44 +37,16 @@ public class PlayerManager : MonoBehaviour {
     }
 
 	[RPC]
-	public void Setup(){
-		u.owner = -1;
-		// check to see what players are open to instance... bail if it there are none available
-		bool[] takenPlayers = new bool[3];
-        foreach(PlayerManager p in GameObject.Find("HBGameController").GetComponentsInChildren<PlayerManager>()){
-        	if(p.u.owner < 3 && p.u.owner >=0){
-        		takenPlayers[p.u.owner] = true;
-        	}
-		}
-		int _pid = -1;
-		int _ourColor = -1;
-		for(int i=0;i<3;i++){
-			if(!takenPlayers[i]){
-				_pid = i;
-				break;
-			}
-		}
-		if(_pid < 0){
-			return;
-		}
-
-		Debug.Log("Adding player: "+_pid+" : "+GetComponent<PhotonView>().isMine);
-        _ourColor = pid = _pid;
+	public void Setup(int _pid){
+        int _ourColor = pid = _pid;
 		GetComponent<UnitBase>().Setup(_pid, HullBreachGameController.globalColors[_ourColor]);
-        ResetPosition();
         u.displaySize = 6f;
         GetComponent<UnitBase>().attackRadius = 12;
-        setup = true;
-        // 
-        foreach(CoreC c in GameObject.Find("HBGameController").GetComponentsInChildren<CoreC>()){
-			if(c.u.owner == _pid){
-		        core = c.u;
-		        break;
-			}        	
-        }
 		u.attackPower = 20;
 		u.attackCooldown = 1f;
 		ourColor = HullBreachGameController.globalColors[_ourColor];
+        ResetPosition();
+        setup = true;
     }
 
     [RPC]
@@ -120,6 +92,13 @@ public class PlayerManager : MonoBehaviour {
         if(!setup){
             return;
         }
+	    foreach(CoreC c in GameObject.Find("HBGameController").GetComponentsInChildren<CoreC>()){
+			if(c.u.owner == pid){
+		        core = c.u;
+		        break;
+			}        	
+        }
+
         if(respawning){
         	respawnRemain -= Time.deltaTime;
 
