@@ -19,7 +19,7 @@ public class InitGame : MonoBehaviour {
 	void Update(){
 		// wait until all players are connected
 		if(playersMapped < 3){
-            VectorGui.Label("Waiting for " + (3-playersMapped) + " players");
+            VectorGui.Label("Aboard "+PhotonNetwork.room.name+" :: Awaiting " + (3-playersMapped) + " factions");
 		}else{
 	        if(PhotonNetwork.isMasterClient && !started){
 		        PhotonNetwork.InstantiateSceneObject("HBGameController", Vector3.zero, Quaternion.identity, 0, null);
