@@ -2,6 +2,12 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+public class ChatItem{
+	public string text;
+	public string player;
+	public double time;
+}
+
 public class InitGame : MonoBehaviour {
 	PhotonView photonView;
 	public static int[] playerMapper;
@@ -10,9 +16,16 @@ public class InitGame : MonoBehaviour {
 	int currentPlayer = 0;
 	int playersMapped = 0;
 	bool started;
+	List<ChatItem> chatLog;
+	string currentChat;
 	// Use this for initialization
 	void Start(){
 		playerNames = new List<string>();
+		chatLog = new List<ChatItem>();
+		for(int i=0;i<25;i++){
+			chatLog.Add(new ChatItem());
+		}
+		currentChat = "";
         PhotonNetwork.isMessageQueueRunning = true;
         playerMapper = new int[3];
     	for(int i=0;i<3; i++){
@@ -30,6 +43,17 @@ public class InitGame : MonoBehaviour {
             VectorGui.Label("Aboard "+PhotonNetwork.room.name+" :: Awaiting " + (3-playersMapped) + " factions");
             foreach(string name in playerNames){
             	VectorGui.Label(name);
+            }
+            foreach(ChatItem chatLine in chatLog){
+            	VectorGui.Label(chatLine.player + " : " +chatLine.text);
+            }
+            currentChat = VectorGui.TextInput(currentChat);
+            if(currentChat.Length > 0){
+	            char lastChar = currentChat[currentChat.Length-1];
+	            if(lastChar == "\n"[0] || lastChar == "\r"[0]){
+	            	GetComponent<PhotonView>().RPC("AddChat", PhotonTargets.All, currentChat, PhotonNetwork.player.name, PhotonNetwork.time);
+	            	currentChat = "";
+	            }            	
             }
 		}else{
 	        if(PhotonNetwork.isMasterClient && !started){
@@ -50,6 +74,10 @@ public class InitGame : MonoBehaviour {
         		}
         	}
         	GetComponent<PhotonView>().RPC("AssignIdToPlayer", PhotonTargets.AllBuffered, freeId, player.ID, player.name);
+        	// dump my chatlog so that the new player gets it
+            foreach(ChatItem chatLine in chatLog){
+            	GetComponent<PhotonView>().RPC("AddChat", PhotonTargets.All, chatLine.text, chatLine.player, chatLine.time);
+            }
         }
     }
 
@@ -66,7 +94,21 @@ public class InitGame : MonoBehaviour {
         	GetComponent<PhotonView>().RPC("RemovePlayer", PhotonTargets.AllBuffered, player.ID, player.name);
         }
     }
-
+    [RPC]
+    void AddChat(string text, string player, double time){
+    	// check to see if this is duped in the logs
+    	foreach(ChatItem c in chatLog){
+    		if(c.time == time && player == c.player){
+    			return;
+    		}
+    	}
+    	chatLog.RemoveAt(0);
+    	ChatItem chat = new ChatItem();
+    	chat.text = text;
+    	chat.player = player;
+    	chat.time = time;
+    	chatLog.Add(chat);
+    }
     [RPC]
 	void RemovePlayer(int playerId, string playerName){
         for(int i=0;i<playerNames.Count; i++){

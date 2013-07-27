@@ -98,12 +98,12 @@ public class VectorGui : MonoBehaviour {
 			        	Debug.Log("should be deleting, but not?");
 			        }
 			    } else {
-			        if (c == "\n"[0] || c == "\r"[0]) {
+			        // if (c == "\n"[0] || c == "\r"[0]) {
 			        	// pressed enter
-			            print("User entered his name: " + inputText);
-			        }else{
+			            // print("User entered his name: " + inputText);
+			        // }else{
 			            inputText += c;
-			        }
+			        // }
 			    }
 			}
 		}
