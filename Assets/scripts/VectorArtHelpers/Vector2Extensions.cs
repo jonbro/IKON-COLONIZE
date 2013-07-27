@@ -12,9 +12,15 @@ public static class TensionExtensions
 	public static float Angle(this Vector2 v){
 		return Mathf.Atan2(v.x, v.y)*180.0f/Mathf.PI;
 	}
+	public static Vector2 Variation(this Vector2 v, float amount){
+		return new Vector2(v.x+(Random.value-0.5f)*amount, v.y+(Random.value-0.5f)*amount);	
+	}
 	#endregion
 
 	#region Vector3 extensions
+	public static Vector3 Variation(this Vector3 v, Vector3 amount){
+		return new Vector3(v.x+(Random.value*amount.x)-amount.x*0.5f, v.y+(Random.value*amount.y)-amount.y*0.5f, v.z+(Random.value-0.5f)*amount.z);
+	}
 	public static Vector3 Variation(this Vector3 v, float amount){
 		return new Vector3(v.x+(Random.value-0.5f)*amount, v.y+(Random.value-0.5f)*amount, v.z+(Random.value-0.5f)*amount);
 	}

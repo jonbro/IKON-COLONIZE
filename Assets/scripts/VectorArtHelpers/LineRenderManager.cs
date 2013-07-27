@@ -11,6 +11,7 @@ public class LineRenderManager : MonoBehaviour {
 	int[] indices;
 	Color32[] cs;
 	int currentLine = 0;
+	public bool exploding;
 	// Use this for initialization
 	void Awake () {
 		if(mesh == null){
@@ -89,6 +90,10 @@ public class LineRenderManager : MonoBehaviour {
         mesh.SetIndices(indices, MeshTopology.Lines, 0);
 	}
 	public void AddLine(Vector3 a, Vector3 b, Color c){
+		if(exploding){
+			GetComponent<ExplosionManager>().AddLine(a, b, Vector3.zero.Variation(new Vector3(15, 15, 0)), Vector3.zero.Variation(new Vector3(15, 5, 0)), c);
+			return;
+		}
 		// bail if the current line is out of bounds
 		if(currentLine+1 > maxLines){
 			// ClearLines();

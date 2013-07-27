@@ -56,11 +56,11 @@ public class InitGame : MonoBehaviour {
 	            }            	
             }
 		}else{
-	        if(PhotonNetwork.isMasterClient && !started){
-		        PhotonNetwork.InstantiateSceneObject("HBGameController", Vector3.zero, Quaternion.identity, 0, null);
-		        started = true;
-	        }
 		}
+        if(PhotonNetwork.isMasterClient && !started){
+	        PhotonNetwork.InstantiateSceneObject("HBGameController", Vector3.zero, Quaternion.identity, 0, null);
+	        started = true;
+        }
 	}
     public void OnPhotonPlayerConnected(PhotonPlayer player)
     {

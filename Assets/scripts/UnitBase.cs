@@ -106,6 +106,13 @@ public class UnitBase : MonoBehaviour {
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize*attackCoolRatio, ourColor, Time.time * 20, 3);
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize, ourColor, 10);		
 	}
+	public void DisplayWinner(){
+		transform.position = u.pos3+Vector3.left;
+		transform.localScale = new Vector3(10, 10, 10);
+		lines.exploding = true;
+		lines.GetComponent<DrawString>().Text("LEAD", transform, 0.2f, Color.Lerp(ourColor, Color.black, Random.value));
+		lines.exploding = false;
+	}
 	public void CheckNeighbors(UnitBase[] units){
 		if(attackCooldownCounter>0){
 			return;

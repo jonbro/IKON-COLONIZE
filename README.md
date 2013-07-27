@@ -12,8 +12,13 @@ http://moebio.com/research/typode/
 TODO:
 =====
 
-- exit and rejoin room, wrong player displayed (p1 becomes p2 if p2 didn't leave)
 - make it so that you can't escape the lanes (put in walls)
+- display the player that is currently winning
+- creeps shouldn't get hung up on the towers (remove the repulsive force from everything but the other creeps)
+- display the attacks better
+- move the dash to a cooldown
+- make all of the modes direct access
+- add an action that destroys all creeps
 
 x game over screen
 x recharge within your towers radius
@@ -29,5 +34,6 @@ x should only heal creeps that actually need it
 x creeps attack dead player (should be impossible)
 x heal doesn't work
 x win state doesn't display on all clients
-- chat room on title screen
-- bigger webplayer
+x chat room on room screen (still should add to title screen)
+x bigger webplayer
+x exit and rejoin room, wrong player displayed (p1 becomes p2 if p2 didn't leave)

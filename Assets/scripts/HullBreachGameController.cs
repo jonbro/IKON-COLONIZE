@@ -82,20 +82,39 @@ public class HullBreachGameController : MonoBehaviour {
 
 	void Update(){
 		if(!setup) return;
-		if(PhotonNetwork.isMasterClient){
-			nextCreepWave -= Time.deltaTime;
-			if(nextCreepWave<=0) SpawnCreeps();
-			UnitBase[] units = GetComponentsInChildren<UnitBase>();
-			for(int i=0;i<units.Length;i++){
-				units[i].CheckNeighbors(units);
-			}
-		}
 
 		// game over
 		if(gameOver){
 			VectorGui.Label("GAME OVER.", 0.3f);
 			VectorGui.Label("WINNER:", 0.3f);
 			VectorGui.Label("Player "+winner, 0.3f, pColors[winner]);
+		}else{
+			if(PhotonNetwork.isMasterClient){
+				nextCreepWave -= Time.deltaTime;
+				if(nextCreepWave<=0) SpawnCreeps();
+				UnitBase[] units = GetComponentsInChildren<UnitBase>();
+				for(int i=0;i<units.Length;i++){
+					units[i].CheckNeighbors(units);
+				}
+			}
+			// loop through the cores and display the winning one
+			CoreC[] cores = GetComponentsInChildren<CoreC>();
+			// convert to list, then sort
+
+			float topHealth = cores[0].u.health;
+			int tempWinner = 0;
+			bool allEqual = true;
+			for(int w=0;w<3;w++){
+				if(topHealth != cores[w].u.health)
+					allEqual = false;
+				if(topHealth<cores[w].u.health){
+					topHealth = cores[w].u.health;
+					tempWinner = w;
+				}
+			}
+			if(!allEqual){
+				cores[tempWinner].GetComponent<UnitBase>().DisplayWinner();
+			}
 		}
 	}
 	[RPC]
