@@ -8,6 +8,7 @@ public class LobbyManager : MonoBehaviour {
     private bool connectFailed = false;
     public TextAsset naval;
     bool chooseRegion;
+    string playerNameBuffer = "";
 	void Start () {
         if (!PhotonNetwork.connected)
         {
@@ -18,9 +19,12 @@ public class LobbyManager : MonoBehaviour {
             chooseRegion = true;
 	    }
 	    // generate a name for this player, if none is assigned yet
-        if (string.IsNullOrEmpty(PhotonNetwork.playerName))
+        if (!PlayerPrefs.HasKey("PlayerName"))
         {
-            PhotonNetwork.playerName = "Guest" + Random.Range(1, 9999);
+            playerNameBuffer = PhotonNetwork.playerName = "Guest" + Random.Range(1, 9999);
+            PlayerPrefs.SetString("PlayerName", playerNameBuffer);
+        }else{
+            playerNameBuffer = PhotonNetwork.playerName = PlayerPrefs.GetString("PlayerName");
         }
 
 	}
@@ -41,6 +45,7 @@ public class LobbyManager : MonoBehaviour {
             }
         }
     }
+
 	// Update is called once per frame
 	void ConnectionUpdate () {
 		VectorGui.Label("HULL BREACH: LOBBY", 0.3f);		
@@ -62,6 +67,16 @@ public class LobbyManager : MonoBehaviour {
         }
     	VectorGui.Label(PhotonNetwork.countOfPlayers + " users are online in " + PhotonNetwork.countOfRooms + " rooms.");
         
+        VectorGui.Label("Player Name");
+        playerNameBuffer = VectorGui.TextInput(playerNameBuffer);
+        PhotonNetwork.playerName = playerNameBuffer;
+        if(PhotonNetwork.playerName != playerNameBuffer){
+            VectorGui.Label("INVALID PLAYER NAME");
+        }else{
+            VectorGui.Label("");
+            PlayerPrefs.SetString("PlayerName", playerNameBuffer);
+        }
+
         if (VectorGui.Button("Create Room"))
         {
 			string[] navalString = naval.text.Split("\n"[0]);

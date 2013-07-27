@@ -12,8 +12,5 @@ public class PregameChat : MonoBehaviour {
         foreach (PhotonPlayer player in PhotonNetwork.playerList){
         	VectorGui.Label(player.name, 0.1f);
         }
-		if (VectorGui.Button("Start Game"))
-		{
-		}
-    }
+   }
 }

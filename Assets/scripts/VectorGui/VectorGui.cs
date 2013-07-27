@@ -8,7 +8,8 @@ public class VectorGui : MonoBehaviour {
 	protected LineRenderManager lines;
 	protected Vector2 penPosition;
 	protected Transform penTransform;
-
+	public static int activeId;
+	public static int currentId;	
 	private static VectorGui instance;
 	float padding = 20;
 
@@ -36,7 +37,12 @@ public class VectorGui : MonoBehaviour {
 	}
 	void Start(){
 	}
+	static int GetId(){
+		currentId++;
+		return currentId;
+	}
 	void Update(){
+		currentId = 0;
 		if(lines == null){
 			lines = GameObject.Find("LineRenderManager").GetComponent<LineRenderManager>();
 			strings = lines.GetComponent<DrawString>();
@@ -73,11 +79,46 @@ public class VectorGui : MonoBehaviour {
 		Vector3 sp = Camera.main.WorldToScreenPoint(wp);
 		penPosition = new Vector2(sp.x, sp.y);		
 	}
+	public static string TextInput(string inputText){
+		// render a button here
+		int id = GetId();
+		if(activeId == currentId){
+			// we are currently using the text field, so should render a cursor...
+			//
+			foreach (char c in Input.inputString) {
+			    if (c == "\b"[0]){
+			        if (inputText.Length != 0){
+			        	Debug.Log(inputText.Length);
+			        	if(inputText.Length == 1){
+			        		inputText = "";
+			        	}else{
+				            inputText = inputText.Substring(0, inputText.Length - 1);
+			        	}
+			        }else{
+			        	Debug.Log("should be deleting, but not?");
+			        }
+			    } else {
+			        if (c == "\n"[0] || c == "\r"[0]) {
+			        	// pressed enter
+			            print("User entered his name: " + inputText);
+			        }else{
+			            inputText += c;
+			        }
+			    }
+			}
+		}
+		Instance._Button(inputText, id);
+		return inputText;
+	}
 	public static bool Button(string buttonText){
 		return instance._Button(buttonText);
 	}
-	public bool _Button(string buttonText){
+	public bool _Button(string buttonText, int _id=-1){
 		// auto gen a rectangle for this button
+		int id = _id;
+		if(_id<0){
+			id = GetId();
+		}
 		Rect buttonRect = new Rect(penPosition.x-5, penPosition.y+5-30, 200, 30);
 		bool hovered = false;
 		Color buttonColor = Color.white;
@@ -101,7 +142,10 @@ public class VectorGui : MonoBehaviour {
 		penPosition = new Vector2(penPosition.x, penPosition.y-40);
 
 		// check to see if the mouse went down over the rect in the last frame, if so mark it as clicked
-
-		return hovered && Input.GetMouseButtonDown(0);
+		if(hovered && Input.GetMouseButtonDown(0)){
+			activeId = id;
+			return true;
+		}
+		return false;
 	}
 }
