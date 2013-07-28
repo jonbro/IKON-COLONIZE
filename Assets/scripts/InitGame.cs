@@ -37,10 +37,17 @@ public class InitGame : MonoBehaviour {
         	currentPlayer++;
         }
 	}
+    void OnLeftRoom(){
+        Application.LoadLevel("lobby");
+    }
 	void Update(){
 		// wait until all players are connected
 		if(playersMapped < 3 && !started){
             VectorGui.Label("Aboard "+PhotonNetwork.room.name+" :: Awaiting " + (3-playersMapped) + " factions");
+            if(VectorGui.Button("Return to lobby")){
+                PhotonNetwork.LeaveRoom();
+            }
+
             foreach(string name in playerNames){
             	VectorGui.Label(name);
             }
@@ -56,12 +63,12 @@ public class InitGame : MonoBehaviour {
 	            }            	
             }
 		}else{
+            if(PhotonNetwork.isMasterClient && !started){
+                AudioManager.Instance.loadSoundsForLevel("Game");
+                PhotonNetwork.InstantiateSceneObject("HBGameController", Vector3.zero, Quaternion.identity, 0, null);
+                started = true;
+            }
 		}
-        if(PhotonNetwork.isMasterClient && !started){
-            AudioManager.Instance.loadSoundsForLevel("Game");
-	        PhotonNetwork.InstantiateSceneObject("HBGameController", Vector3.zero, Quaternion.identity, 0, null);
-	        started = true;
-        }
 	}
     public void OnPhotonPlayerConnected(PhotonPlayer player)
     {

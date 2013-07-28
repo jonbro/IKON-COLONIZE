@@ -79,7 +79,9 @@ public class HullBreachGameController : MonoBehaviour {
 	void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
 	{
 	}
-
+	void OnLeftRoom(){
+		Application.LoadLevel("lobby");
+	}
 	void Update(){
 		if(!setup) return;
 		if(PlayerPrefs.GetInt("Music") == 1){
@@ -96,6 +98,9 @@ public class HullBreachGameController : MonoBehaviour {
 			VectorGui.Label("GAME OVER.", 0.3f);
 			VectorGui.Label("WINNER:", 0.3f);
 			VectorGui.Label("Player "+winner, 0.3f, pColors[winner]);
+			if(VectorGui.Button("EXIT")){
+                PhotonNetwork.LeaveRoom();
+			}
 		}else{
 			if(PhotonNetwork.isMasterClient){
 				nextCreepWave -= Time.deltaTime;

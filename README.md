@@ -13,11 +13,13 @@ TODO:
 =====
 
 x move the dash to a cooldown
-- add audio
-- make the homebase player recharge less powerful
+x add audio
+x make the homebase player recharge less powerful
 - add an action that destroys all creeps
-- button to exit from end of game back to the lobby screen
-- button to exit pregame chat back to lobby
+- upload to kongregate
+- put the turtle back in
+x button to exit from end of game back to the lobby screen
+x button to exit pregame chat back to lobby
 
 x game over screen
 x recharge within your towers radius

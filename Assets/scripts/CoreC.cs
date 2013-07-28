@@ -72,7 +72,7 @@ public class CoreC : MonoBehaviour {
 			if(targets[0].GetComponent<PlayerManager>() && targets[0].u.owner == u.owner){
 				// heal!
 				GetComponent<PhotonView>().RPC("SetCooldown", PhotonTargets.AllBuffered, u.attackCooldown);
-				targets[0].GetComponent<PhotonView>().RPC("SetHealth", PhotonTargets.AllBuffered, targets[0].u.fullHealth);
+				targets[0].GetComponent<PhotonView>().RPC("SetHealth", PhotonTargets.AllBuffered, targets[0].u.health+targets[0].u.fullHealth*0.5f);
 			}else if(targets[0].u.owner != u.owner){
 				GetComponent<UnitBase>().attacking = true;
 				GetComponent<UnitBase>().AttackTarget(targets[0]);

@@ -33,6 +33,7 @@ public class LobbyManager : MonoBehaviour {
 
 	}
 	void Update(){
+        
         if(chooseRegion){
             ConnectionUpdate();
         }else{
@@ -48,11 +49,28 @@ public class LobbyManager : MonoBehaviour {
                 }
             }
         }
+        /*
+        // icon renderer.
+        LineRenderManager lines = GameObject.Find("LineRenderManager").GetComponent<LineRenderManager>();
+        Vector2 bp = new Vector2(0,0);
+        Color ourColor = Color.white;
+        lines.AddCircle(new Vector3(bp.x, bp.y, 25), 20, ourColor, Time.time * 20, 3);
+        lines.AddCircle(new Vector3(bp.x, bp.y, 25), 20, ourColor, 10);
+        int numPoints = 25;
+        int currentHealth = 25;
+        for(int i=0;i<currentHealth;i++){
+            float sAngle = (i/(float)(numPoints)*360.0f-Time.time*40.0f)*Mathf.Deg2Rad;
+            Vector3 pa = new Vector3(Mathf.Cos(sAngle)*20+bp.x, Mathf.Sin(sAngle)*20+bp.y, 40);
+            float ar = 40+((Mathf.Sin(Time.time*4.0f+i)+1.0f)*0.5f)*(40-20);
+            Vector3 pb = new Vector3(Mathf.Cos(sAngle)*ar+bp.x, Mathf.Sin(sAngle)*ar+bp.y, 40);
+            lines.AddLine(pa, pb, new Color(ourColor.r, ourColor.g, ourColor.b, 0.25f));
+        }
+        */
     }
 
 	// Update is called once per frame
 	void ConnectionUpdate () {
-		VectorGui.Label("HULL BREACH: LOBBY", 0.3f);		
+		VectorGui.Label("IKON_COLONIZE: LOBBY", 0.3f);		
         if (!PhotonNetwork.connected)
         {
             if (PhotonNetwork.connectionState == ConnectionState.Connecting)

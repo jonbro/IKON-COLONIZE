@@ -5,7 +5,7 @@ public class PregameChat : MonoBehaviour {
 	void Start (){
 	}
     void Update () {
-        VectorGui.Label("HULL BREACH: PREGAME", 0.3f);
+        VectorGui.Label("IKON_COLONIZE: PREGAME", 0.3f);
         VectorGui.Label(PhotonNetwork.room.name, 0.2f);
     	VectorGui.Label("Connected Players", 0.1f);
 
