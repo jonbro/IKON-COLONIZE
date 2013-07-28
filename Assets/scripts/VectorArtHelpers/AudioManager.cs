@@ -134,10 +134,12 @@ public class AudioManager : MonoBehaviour {
 		GameObject g = audioContainers[currentContainer];
 		currentContainer = (currentContainer+1)%numContainers;
         AudioSource source = g.audio;
-        source.clip = clip;
-        source.volume = volume;
-        source.pitch = pitch;
-	    source.Play ();
+    	if(PlayerPrefs.GetInt("Music") == 1){
+	        source.clip = clip;
+	        source.volume = volume;
+	        source.pitch = pitch;
+		    source.Play ();    		
+    	}
         return source;
     }
 

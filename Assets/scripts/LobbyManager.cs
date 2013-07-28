@@ -13,6 +13,7 @@ public class LobbyManager : MonoBehaviour {
         if(!PlayerPrefs.HasKey("Music")){
             PlayerPrefs.SetInt("Music", 1);
         }
+        AudioManager.Instance.loadSoundsForLevel("lobby");
         if (!PhotonNetwork.connected)
         {
             // PhotonNetwork.ConnectUsingSettings("1.0");

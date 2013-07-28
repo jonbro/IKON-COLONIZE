@@ -82,7 +82,15 @@ public class HullBreachGameController : MonoBehaviour {
 
 	void Update(){
 		if(!setup) return;
-
+		if(PlayerPrefs.GetInt("Music") == 1){
+			if(VectorGui.Button("MUTE")){
+				PlayerPrefs.SetInt("Music", 0);
+			}
+		}else{
+			if(VectorGui.Button("UNMUTE")){
+				PlayerPrefs.SetInt("Music", 1);
+			}
+		}
 		// game over
 		if(gameOver){
 			VectorGui.Label("GAME OVER.", 0.3f);
