@@ -1,6 +1,9 @@
 hull_breach
 ===========
  
+[Playable on kongregate]http://www.kongregate.com/games/jonbro/ikon-colonize
+----------------------------------------------------------------------------
+
 a 3 player lomalike for #7drts / http://www.ludumdare.com/compo
 
 includes code from:
@@ -12,15 +15,20 @@ http://moebio.com/research/typode/
 TODO:
 =====
 
+- put the turtle back in
+- add an action that destroys all creeps
+
+CHANGELOG:
+==========
+
+1.0 JAM VERSION
+
 x move the dash to a cooldown
 x add audio
 x make the homebase player recharge less powerful
-- add an action that destroys all creeps
-- upload to kongregate
-- put the turtle back in
+x upload to kongregate
 x button to exit from end of game back to the lobby screen
 x button to exit pregame chat back to lobby
-
 x game over screen
 x recharge within your towers radius
 x balance the towers to be beatable (should spend longer burning down the creeps, prioritize targets based on distance)
