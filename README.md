@@ -1,8 +1,8 @@
 hull_breach
 ===========
  
-[Playable on kongregate]http://www.kongregate.com/games/jonbro/ikon-colonize
-----------------------------------------------------------------------------
+[Playable on kongregate](http://www.kongregate.com/games/jonbro/ikon-colonize)
+------------------------------------------------------------------------------
 
 a 3 player lomalike for #7drts / http://www.ludumdare.com/compo
 
