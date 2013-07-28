@@ -74,12 +74,13 @@ public class UnitBase : MonoBehaviour {
 	}
 	void Update(){
 		attackCooldownCounter -= Time.deltaTime;
+		Draw();
+	}
+	void Draw(){
 		attackCoolRatio = Mathf.Min(1, Mathf.Max(0, 1-attackCooldownCounter/u.attackCooldown));
 		Vector2 bp = u.position;
 		lines.AddCircle(new Vector3(bp.x, bp.y, 25), u.displaySize*attackCoolRatio, ourColor, Time.time * 20, 3);
 		lines.AddCircle(new Vector3(bp.x, bp.y, 25), u.displaySize, ourColor, 10);
-		// lines.AddDashedCircle(new Vector3(bp.x, bp.y, 25), attackRadius, ourColor, Time.time * 20, 10);
-		// display health as a radial set of lines
 		int numPoints = 25;
 		int currentHealth = (int)Mathf.Floor((u.health/u.fullHealth)*25.0f);
 		for(int i=0;i<currentHealth;i++){
@@ -90,7 +91,6 @@ public class UnitBase : MonoBehaviour {
 			lines.AddLine(pa, pb, new Color(ourColor.r, ourColor.g, ourColor.b, 0.25f));
 		}
 	}
-
 	[RPC]
 	public void SetHealth(float newHealth){
 		u.health = newHealth;
@@ -170,8 +170,16 @@ public class UnitBase : MonoBehaviour {
 		attackCooldownCounter = u.attackCooldown;
 		GetComponent<PhotonView>().RPC("SetCooldown", PhotonTargets.AllBuffered, u.attackCooldown);
 		target.GetComponent<PhotonView>().RPC("SetHealth", PhotonTargets.AllBuffered, target.u.health - u.attackPower);
+		target.GetComponent<PhotonView>().RPC("GotHit", PhotonTargets.All);
 		if(target.u.health <= 0){
 			target.u.alive = false;
 		}
+	}
+
+	[RPC]
+	void GotHit(){
+		lines.exploding = true;
+		Draw();
+		lines.exploding = false;
 	}
 }

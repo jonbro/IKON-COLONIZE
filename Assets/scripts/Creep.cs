@@ -128,7 +128,7 @@ public class Creep : MonoBehaviour {
 		Vector2 steer = Vector2.zero;
 		int count = 0;
 		foreach(UnitBase c in units){
-			if(c.u.owner == u.owner){
+			if(c.u.owner == u.owner && !c.GetComponent<Tower>()){
 				float targetSep = (u.displaySize+c.u.displaySize)*2;
 				float d = Vector2.Distance(u.position, c.u.position);
 				// should account for the towers, possibly have different weighting for those...

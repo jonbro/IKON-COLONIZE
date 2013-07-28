@@ -12,13 +12,12 @@ http://moebio.com/research/typode/
 TODO:
 =====
 
-- make it so that you can't escape the lanes (put in walls)
-- display the player that is currently winning
-- creeps shouldn't get hung up on the towers (remove the repulsive force from everything but the other creeps)
-- display the attacks better
-- move the dash to a cooldown
-- make all of the modes direct access
+x move the dash to a cooldown
+- add audio
+- make the homebase player recharge less powerful
 - add an action that destroys all creeps
+- button to exit from end of game back to the lobby screen
+- button to exit pregame chat back to lobby
 
 x game over screen
 x recharge within your towers radius
@@ -37,3 +36,11 @@ x win state doesn't display on all clients
 x chat room on room screen (still should add to title screen)
 x bigger webplayer
 x exit and rejoin room, wrong player displayed (p1 becomes p2 if p2 didn't leave)
+x display the player that is currently winning
+x creeps shouldn't get hung up on the towers (remove the repulsive force from everything but the other creeps)
+x display the attacks better
+x have something that shows what the player is closest to
+x make all of the modes direct access
+
+// things that didn't make it in
+- make it so that you can't escape the lanes (put in walls)

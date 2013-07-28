@@ -28,6 +28,11 @@ public class PlayerManager : MonoBehaviour {
 	public bool respawning;
 	int killCount = 0;
 	float respawnRemain;
+	
+	float dashChargeTime = 15;
+	float dashAmount = 4.0f;
+	float dashTime, dashRemain;
+	bool dashing;
 
     void Start(){
         lines = GameObject.Find("LineRenderManager").GetComponent<LineRenderManager>();
@@ -98,7 +103,6 @@ public class PlayerManager : MonoBehaviour {
 		        break;
 			}        	
         }
-
         if(respawning){
         	respawnRemain -= Time.deltaTime;
 
@@ -112,33 +116,42 @@ public class PlayerManager : MonoBehaviour {
 		        }
         	}
         }else{
+        	if(dashTime < dashChargeTime){
+        		dashTime += Time.deltaTime;
+        	}else{
+        		dashTime = dashChargeTime;
+        	}
         	if(!GetComponent<PhotonView>().isMine || !selectingMode){    		
 				transform.position = u.pos3+Vector3.left*-10;
 				transform.localScale = new Vector3(10, 10, 10);
 				strings.Text(currentMode.ToString(), transform, 0.1f, ourColor);
         	}
+        	if(dashing){
+				VectorGui.Label("DASHING", 0.1f, ourColor);
+        	}else if(dashTime<dashChargeTime){
+        		VectorGui.Label("Dash charge", 0.1f, ourColor);
+        	}else{
+        		VectorGui.Label("Dash charge READY", 0.1f, ourColor);
+        	}
+        	if(dashing){
+		        VectorGui.ProgressBar(dashRemain/dashAmount, Color.Lerp(ourColor, Color.white, (Mathf.Sin(Time.time*6.0f)+1.0f)*0.5f));
+        	}else{
+		        VectorGui.ProgressBar(dashTime/dashChargeTime, ourColor);
+        	}
         }
         if(GetComponent<PhotonView>().isMine){
-			if(GetComponent<PhotonView>().isMine && LFInput.GetButtonDown("p1 flip")){
-				selectingMode = true;
-			}
-			if(selectingMode){
-				// check to see what mode we should switch into
-				if(LFInput.GetAxis("p1 vertical") > 0){
-					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.ATTACK);
-					selectingMode = false;
-				}else if(LFInput.GetAxis("p1 vertical") < 0){
-					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.HEAL);
-					selectingMode = false;
-				}else if(LFInput.GetAxis("p1 horizontal") < 0){
-					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.DASH);
-					selectingMode = false;
-				}else if(LFInput.GetAxis("p1 horizontal") > 0){
-					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.TURTLE);
-					selectingMode = false;
+			if(GetComponent<PhotonView>().isMine){
+				if(LFInput.GetButtonDown("p1 flip")){
+					currentMode = Modes.ATTACK;
+				}else if(LFInput.GetButtonDown("p1 fire")){
+					currentMode = Modes.HEAL;
+				}else if(LFInput.GetButtonDown("p1 dash") && !dashing && dashTime == dashChargeTime){
+					dashing = true;
+					dashRemain = dashAmount;
 				}
-				DrawOptions();
-			}else if(currentMode == Modes.TURTLE){
+			}
+
+			if(currentMode == Modes.TURTLE){
 				if(GetComponent<UnitBase>().attackCooldownCounter <= 0){
 					GetComponent<PhotonView>().RPC("SetHealth", PhotonTargets.AllBuffered, u.health+15);
 					GetComponent<UnitBase>().attackCooldownCounter = u.attackCooldown;
@@ -146,10 +159,31 @@ public class PlayerManager : MonoBehaviour {
 			}else if(!respawning){
 				Vector2 input = new Vector2(LFInput.GetAxis("p1 horizontal"), -LFInput.GetAxis("p1 vertical"));
 				float speed = 40.0f;
-				if(currentMode == Modes.DASH){
-					speed += speed*0.5f;
+				if(dashing){
+					speed += speed*1.5f;
+					dashRemain -= Time.deltaTime;
+					if(dashRemain <= 0){
+						dashing = false;
+					}
 				}
 				u.position += input*(Time.deltaTime*speed);
+				// draw the target
+				BuildTargetList();
+				if(currentMode == Modes.ATTACK){
+					foreach(UnitBase unit in targets){
+						if(unit.u.owner != u.owner){
+							lines.AddLine(u.pos3, unit.u.pos3, Color.white);
+							break;
+						}
+					}
+				}else if(currentMode == Modes.HEAL){
+					foreach(UnitBase unit in targets){
+						if(unit.u.owner == u.owner){
+							lines.AddLine(u.pos3, unit.u.pos3, Color.white);
+							break;
+						}
+					}
+				}
 			}        	
         }
 	}
@@ -172,16 +206,27 @@ public class PlayerManager : MonoBehaviour {
 		strings.Text(Modes.TURTLE.ToString(), transform, 0.1f, ourColor);
 
 	}
-	public void CheckNeighbors(UnitBase[] units){
+	void BuildTargetList(){
 		targets.Clear();
+		UnitBase[] units = transform.parent.GetComponentsInChildren<UnitBase>();
 		foreach(UnitBase unit in units){
 			if((currentMode == Modes.ATTACK && unit.u.owner != u.owner) || (currentMode == Modes.HEAL && unit.u != u && unit.u.owner == u.owner && !unit.GetComponent<CoreC>())){
-				if(Vector2.Distance(unit.u.position, u.position) - unit.u.displaySize < GetComponent<UnitBase>().attackRadius){
+				float dist = Vector2.Distance(unit.u.position, u.position);
+				if(dist - unit.u.displaySize < GetComponent<UnitBase>().attackRadius){
 					// we are within the attack radius!
+					unit.temporaryDistance = dist;
 					targets.Add(unit);
 				}
 			}
 		}
+		targets.Sort(delegate(UnitBase p1, UnitBase p2)
+		    {
+		        return (p1.temporaryDistance < p2.temporaryDistance)?-1:1;
+		    }
+		);
+	}
+	public void CheckNeighbors(UnitBase[] units){
+		BuildTargetList();
 		GetComponent<UnitBase>().attacking = false;
 		if(targets.Count > 0){
 			if(currentMode == Modes.HEAL && GetComponent<UnitBase>().attackCooldownCounter <= 0){

@@ -54,6 +54,19 @@ public class VectorGui : MonoBehaviour {
 		Instance.penTransform.position = Camera.main.ScreenToWorldPoint(new Vector3(Instance.penPosition.x, Instance.penPosition.y, 20));
 		return Instance.penTransform;
 	}
+	public static void ProgressBar(float ratio, Color color){
+		Instance._ProgressBar(ratio, color);
+	}
+	public void _ProgressBar(float ratio, Color color){
+		// draw the bounding box
+		Rect r = new Rect(penPosition.x-5, penPosition.y+5-10, 200, 10);
+		DrawRect(r, Color.Lerp(color, Color.black, 0.5f));
+		// fill the rect with the various bits
+		for(int i=0;i<(int)(50*ratio);i++){
+			float xpos = r.x+200/50.0f*i;
+			lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(xpos, r.y, 20)), Camera.main.ScreenToWorldPoint(new Vector3(xpos, r.yMax, 20)), color);
+		}
+	}
 	public static void Label(string LabelText){
 		// draw the label
 		Label(LabelText, 0.1f);
@@ -127,10 +140,7 @@ public class VectorGui : MonoBehaviour {
 			buttonColor = Color.green;
 		}
 		// draw the outlines of the button
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.y, 20)), Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.xMax, buttonRect.y, 20)), buttonColor);
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.xMax, buttonRect.y, 20)), Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.xMax, buttonRect.yMax, 20)), buttonColor);
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.xMax, buttonRect.yMax, 20)), Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.yMax, 20)), buttonColor);
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.yMax, 20)), Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.y, 20)), buttonColor);
+		DrawRect(buttonRect, buttonColor);
 		// draw the button shadown
 		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.y+2, 20)), Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.xMax-2, buttonRect.y+2, 20)), buttonColor*0.5f);
 		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.yMax, 20)), Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.y+2, 20)), buttonColor*0.5f);
@@ -147,5 +157,11 @@ public class VectorGui : MonoBehaviour {
 			return true;
 		}
 		return false;
+	}
+	public void DrawRect(Rect r, Color c){
+		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(r.x, r.y, 20)), Camera.main.ScreenToWorldPoint(new Vector3(r.xMax, r.y, 20)), c);
+		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(r.xMax, r.y, 20)), Camera.main.ScreenToWorldPoint(new Vector3(r.xMax, r.yMax, 20)), c);
+		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(r.xMax, r.yMax, 20)), Camera.main.ScreenToWorldPoint(new Vector3(r.x, r.yMax, 20)), c);
+		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(r.x, r.yMax, 20)), Camera.main.ScreenToWorldPoint(new Vector3(r.x, r.y, 20)), c);
 	}
 }

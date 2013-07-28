@@ -39,7 +39,7 @@ public class InitGame : MonoBehaviour {
 	}
 	void Update(){
 		// wait until all players are connected
-		if(playersMapped < 3){
+		if(playersMapped < 3 && !started){
             VectorGui.Label("Aboard "+PhotonNetwork.room.name+" :: Awaiting " + (3-playersMapped) + " factions");
             foreach(string name in playerNames){
             	VectorGui.Label(name);
@@ -56,11 +56,11 @@ public class InitGame : MonoBehaviour {
 	            }            	
             }
 		}else{
+            if(PhotonNetwork.isMasterClient && !started){
+                PhotonNetwork.InstantiateSceneObject("HBGameController", Vector3.zero, Quaternion.identity, 0, null);
+                started = true;
+            }
 		}
-        if(PhotonNetwork.isMasterClient && !started){
-	        PhotonNetwork.InstantiateSceneObject("HBGameController", Vector3.zero, Quaternion.identity, 0, null);
-	        started = true;
-        }
 	}
     public void OnPhotonPlayerConnected(PhotonPlayer player)
     {
