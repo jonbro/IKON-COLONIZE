@@ -4,9 +4,10 @@ using System.Collections.Generic;
 
 public class AudioManager : MonoBehaviour {
 	enum Fade {In, Out};
-	public AudioClip[] blocker;
-	public AudioClip scoringOn;
-	// public MusicBedController musicBeds;
+	public AudioClip[] Deaths1;
+	public AudioClip[] Deaths2;
+	public AudioClip[] Deaths3;
+	public MusicBedController musicBeds;
 	private List<GameObject> musicBedsForLevel;
 	private GameObject[] audioContainers;
 	private GameObject[] blockerContainers;
@@ -31,20 +32,11 @@ public class AudioManager : MonoBehaviour {
 		DontDestroyOnLoad(gameObject);
 		musicMuted = false;
 		audioContainers = new GameObject[numContainers];
-		blockerContainers = new GameObject[blocker.Length];
 		for (int i = 0; i < numContainers; i++) {
 			GameObject g = audioContainers[i] = new GameObject();
 			g.transform.position = transform.position;
 			g.transform.parent = transform;
 	        g.AddComponent<AudioSource>();
-		}
-		for(int i = 0;i<blocker.Length;i++){
-			GameObject g = blockerContainers[i] = new GameObject();
-			g.transform.position = transform.position;
-			g.transform.parent = transform;
-	        AudioSource asource = g.AddComponent<AudioSource>();
-	        asource.clip = blocker[i];
-	        asource.loop = true;
 		}
 		musicBedsForLevel = new List<GameObject>();
 	}
@@ -70,48 +62,38 @@ public class AudioManager : MonoBehaviour {
 	public void loadSoundsForLevel(string levelName){
 		// delete all the old level sounds
 		// eventually should fade these out
-		GetComponent<AudioLowPassFilter>().cutoffFrequency = 22000;
-		GetComponent<AudioLowPassFilter>().enabled = false;
 		for(int i=0;i<musicBedsForLevel.Count;i++){
 			StartCoroutine(FadeAudio(bedFadeTime, Fade.Out, musicBedsForLevel[i], true));
 		}
 		musicBedsForLevel.Clear();
-		// foreach(MusicBedGroup mbg in instance.musicBeds.MusicBeds){
-		// 	if(mbg.levelName == levelName){
-		// 		foreach(AudioClip c in mbg.loops){
-		// 			GameObject g = new GameObject("music bed");
-		// 			g.transform.position = transform.position;
-		// 			g.transform.parent = transform;
-		// 	        g.AddComponent<AudioSource>();
-		// 	        g.GetComponent<AudioSource>().clip = c;
-		// 	        g.GetComponent<AudioSource>().loop = true;
-		// 	        g.GetComponent<AudioSource>().Play();
-		// 	        if(musicMuted){
-		// 	        	g.GetComponent<AudioSource>().volume = 0;
-		// 	        }
-		// 	        musicBedsForLevel.Add(g);
-		// 		}
-		// 	}
-		// }
+		foreach(MusicBedGroup mbg in instance.musicBeds.MusicBeds){
+			if(mbg.levelName == levelName){
+				foreach(AudioClip c in mbg.loops){
+					GameObject g = new GameObject("music bed");
+					g.transform.position = transform.position;
+					g.transform.parent = transform;
+			        g.AddComponent<AudioSource>();
+			        g.GetComponent<AudioSource>().clip = c;
+			        g.GetComponent<AudioSource>().loop = true;
+			        g.GetComponent<AudioSource>().Play();
+			        if(musicMuted){
+			        	g.GetComponent<AudioSource>().volume = 0;
+			        }
+			        musicBedsForLevel.Add(g);
+				}
+			}
+		}
 	}
 	public void PauseMusic(){
-		// lower the lowpass filter
-		GetComponent<AudioLowPassFilter>().enabled = true;
-		GetComponent<AudioLowPassFilter>().cutoffFrequency = 400;
-		/*
 		for(int i=0;i<musicBedsForLevel.Count;i++){
 			musicBedsForLevel[i].audio.Pause();
 		}
-		*/
+		
 	}
 	public void PlayMusic(){
-		GetComponent<AudioLowPassFilter>().enabled = false;
-		GetComponent<AudioLowPassFilter>().cutoffFrequency = 22000;
-		/*
 		for(int i=0;i<musicBedsForLevel.Count;i++){
 			musicBedsForLevel[i].audio.Play();
 		}
-		*/
 	}
 	IEnumerator FadeAudio (float timer, Fade fadeType, GameObject go, bool shouldDestroy) {
 		float start = go.audio.volume;
@@ -130,22 +112,23 @@ public class AudioManager : MonoBehaviour {
 			Destroy(go);
 		}
 	}
-	public void PlayBlocker(int blockerCount){
-		blockerContainers[blockerCount].audio.Play();
-		// Play(blocker[blockerCount], transform, 1, 1);
-	}
-	public void StopBlocker(int blockerCount){
-		blockerContainers[blockerCount].audio.Stop();
-		// blockerContainers[blockerCount].audio.Rewind();
-		// Play(blocker[blockerCount], transform, 1, 1);
-	}
-	public void ScoringOn(){
-		Play(scoringOn, transform, 1, 1);
+	public void Deaths(int count){
+		if(count == 1){
+			Play(Deaths1[Random.Range(0, Deaths1.Length)], transform, 1.0f, 1.0f);
+		}
+		if(count == 2){
+			Play(Deaths2[Random.Range(0, Deaths2.Length)]);
+		}
+		if(count == 3){
+			Play(Deaths3[Random.Range(0, Deaths3.Length)]);
+		}
 	}
 	public void levelEnd(){
 
 	}
-
+	public AudioSource Play(AudioClip clip){
+		return Play(clip, transform, 1.0f, 1.0f);
+	}
     public AudioSource Play(AudioClip clip, Transform emitter, float volume, float pitch)
     {
 		GameObject g = audioContainers[currentContainer];

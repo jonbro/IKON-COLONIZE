@@ -103,6 +103,7 @@ public class UnitBase : MonoBehaviour {
 
 	[RPC]
 	public void Explode(){
+		AudioManager.Instance.Deaths(u.owner+1);
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize*attackCoolRatio, ourColor, Time.time * 20, 3);
 		lines.AddCircleExplosion(new Vector3(u.position.x, u.position.y, 25), u.displaySize, ourColor, 10);		
 	}

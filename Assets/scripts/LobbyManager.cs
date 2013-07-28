@@ -10,6 +10,9 @@ public class LobbyManager : MonoBehaviour {
     bool chooseRegion;
     string playerNameBuffer = "";
 	void Start () {
+        if(!PlayerPrefs.HasKey("Music")){
+            PlayerPrefs.SetInt("Music", 1);
+        }
         if (!PhotonNetwork.connected)
         {
             // PhotonNetwork.ConnectUsingSettings("1.0");
