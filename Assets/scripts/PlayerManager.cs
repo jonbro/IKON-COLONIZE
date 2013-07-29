@@ -126,25 +126,27 @@ public class PlayerManager : MonoBehaviour {
 				transform.localScale = new Vector3(10, 10, 10);
 				strings.Text(currentMode.ToString(), transform, 0.1f, ourColor);
         	}
-        	if(dashing){
-				VectorGui.Label("DASHING", 0.1f, ourColor);
-        	}else if(dashTime<dashChargeTime){
-        		VectorGui.Label("Dash charge", 0.1f, ourColor);
-        	}else{
-        		VectorGui.Label("Dash charge READY", 0.1f, ourColor);
-        	}
-        	if(dashing){
-		        VectorGui.ProgressBar(dashRemain/dashAmount, Color.Lerp(ourColor, Color.white, (Mathf.Sin(Time.time*6.0f)+1.0f)*0.5f));
-        	}else{
-		        VectorGui.ProgressBar(dashTime/dashChargeTime, ourColor);
+	        if(GetComponent<PhotonView>().isMine){
+	        	if(dashing){
+					VectorGui.Label("DASHING", 0.1f, ourColor);
+	        	}else if(dashTime<dashChargeTime){
+	        		VectorGui.Label("Dash charge", 0.1f, ourColor);
+	        	}else{
+	        		VectorGui.Label("Dash charge READY", 0.1f, ourColor);
+	        	}
+	        	if(dashing){
+			        VectorGui.ProgressBar(dashRemain/dashAmount, Color.Lerp(ourColor, Color.white, (Mathf.Sin(Time.time*6.0f)+1.0f)*0.5f));
+	        	}else{
+			        VectorGui.ProgressBar(dashTime/dashChargeTime, ourColor);
+	        	}
         	}
         }
         if(GetComponent<PhotonView>().isMine){
 			if(GetComponent<PhotonView>().isMine){
 				if(LFInput.GetButtonDown("p1 flip")){
-					currentMode = Modes.ATTACK;
+					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.ATTACK);
 				}else if(LFInput.GetButtonDown("p1 fire")){
-					currentMode = Modes.HEAL;
+					GetComponent<PhotonView>().RPC("SetMode", PhotonTargets.AllBuffered, (int)Modes.HEAL);
 				}else if(LFInput.GetButtonDown("p1 dash") && !dashing && dashTime == dashChargeTime){
 					dashing = true;
 					dashRemain = dashAmount;
@@ -210,7 +212,10 @@ public class PlayerManager : MonoBehaviour {
 		targets.Clear();
 		UnitBase[] units = transform.parent.GetComponentsInChildren<UnitBase>();
 		foreach(UnitBase unit in units){
-			if((currentMode == Modes.ATTACK && unit.u.owner != u.owner) || (currentMode == Modes.HEAL && unit.u != u && unit.u.owner == u.owner && !unit.GetComponent<CoreC>())){
+			if(
+				(currentMode == Modes.ATTACK && unit.u.owner != u.owner) ||
+				(currentMode == Modes.HEAL && unit.u != u && unit.u.owner == u.owner && !unit.GetComponent<CoreC>()))
+			{
 				float dist = Vector2.Distance(unit.u.position, u.position);
 				if(dist - unit.u.displaySize < GetComponent<UnitBase>().attackRadius){
 					// we are within the attack radius!
@@ -230,6 +235,7 @@ public class PlayerManager : MonoBehaviour {
 		GetComponent<UnitBase>().attacking = false;
 		if(targets.Count > 0){
 			if(currentMode == Modes.HEAL && GetComponent<UnitBase>().attackCooldownCounter <= 0){
+				Debug.Log("Healing");
 				GetComponent<UnitBase>().attackCooldownCounter = u.attackCooldown;
 				GetComponent<PhotonView>().RPC("SetCooldown", PhotonTargets.AllBuffered, u.attackCooldown);
 				targets[0].GetComponent<PhotonView>().RPC("SetHealth", PhotonTargets.AllBuffered, targets[0].u.health + 20);

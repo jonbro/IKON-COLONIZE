@@ -19,7 +19,7 @@ public class LobbyManager : MonoBehaviour {
             // PhotonNetwork.ConnectUsingSettings("1.0");
             ServerSettings ss = new ServerSettings();
             ss.UseCloud("c2bd3559-19e2-4734-88c9-fdd1d789be53", (int)CloudServerRegion.US);
-            PhotonNetwork.Connect(ss.ServerAddress, ss.ServerPort, ss.AppID, "1.0");
+            PhotonNetwork.Connect(ss.ServerAddress, ss.ServerPort, ss.AppID, "1.1");
             chooseRegion = true;
 	    }
 	    // generate a name for this player, if none is assigned yet
@@ -102,7 +102,7 @@ public class LobbyManager : MonoBehaviour {
         if (VectorGui.Button("Create Room"))
         {
 			string[] navalString = naval.text.Split("\n"[0]);
-            PhotonNetwork.CreateRoom(navalString[Random.Range(0, navalString.Length)] + " " +navalString[Random.Range(0, navalString.Length)], true, true, 10);
+            PhotonNetwork.CreateRoom(navalString[Random.Range(0, navalString.Length)] + " " +navalString[Random.Range(0, navalString.Length)], true, true, 3);
         }
 
         if (PhotonNetwork.GetRoomList().Length == 0)
