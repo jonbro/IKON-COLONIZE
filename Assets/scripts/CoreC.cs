@@ -47,6 +47,7 @@ public class CoreC : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		// display current xp
+		
 	}
 	public void CheckNeighbors(UnitBase[] units){
 		targets.Clear();

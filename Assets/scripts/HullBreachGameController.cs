@@ -113,20 +113,8 @@ public class HullBreachGameController : MonoBehaviour {
 			// loop through the cores and display the winning one
 			CoreC[] cores = GetComponentsInChildren<CoreC>();
 			// convert to list, then sort
-
-			float topHealth = cores[0].u.health;
-			int tempWinner = 0;
-			bool allEqual = true;
 			for(int w=0;w<3;w++){
-				if(topHealth != cores[w].u.health)
-					allEqual = false;
-				if(topHealth<cores[w].u.health){
-					topHealth = cores[w].u.health;
-					tempWinner = w;
-				}
-			}
-			if(!allEqual){
-				cores[tempWinner].GetComponent<UnitBase>().DisplayWinner();
+				cores[w].GetComponent<UnitBase>().DisplayWinner();
 			}
 		}
 	}
