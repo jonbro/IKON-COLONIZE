@@ -18,7 +18,7 @@ public class LobbyManager : MonoBehaviour {
         {
             // PhotonNetwork.ConnectUsingSettings("1.0");
             ServerSettings ss = new ServerSettings();
-            ss.UseCloud("c2bd3559-19e2-4734-88c9-fdd1d789be53", (int)CloudServerRegion.US);
+            ss.UseCloud("c2bd3559-19e2-4734-88c9-fdd1d789be53", (int)CloudServerRegion.EU);
             PhotonNetwork.Connect(ss.ServerAddress, ss.ServerPort, ss.AppID, "1.1");
             chooseRegion = true;
 	    }
